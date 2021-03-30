@@ -1,4 +1,5 @@
 import tkinter as tk
+from utils import make_2d_array
 
 class ChessBoardGUI(tk.Frame):
     def __init__(self, master):
@@ -11,18 +12,17 @@ class ChessBoardGUI(tk.Frame):
         self._initialize_board_buttons()
 
     def _initialize_board_buttons(self):
-        self.board_buttons = []
+        self.board_buttons = make_2d_array(range(0, 8), None)
         for x in range(0, 8):
-            self.board_buttons.append([])
             for y in range(0, 8):
                 bg = 'white' if (x + y) % 2 == 0 else 'black'
                 btn = tk.Button(self, bg=bg)
                 btn['text'] = f"{x}x{y}"
                 btn.grid(row=x, column=y, sticky='nesw')
-                btn.bind("<Button-1>", self.click)
-                self.board_buttons[x].append(btn)
+                btn.bind("<Button-1>", self._click)
+                self.board_buttons[x][y] = btn
 
-    def click(self, event):
+    def _click(self, event):
         sender = event.widget
         # do something
 
