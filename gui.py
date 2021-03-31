@@ -2,8 +2,9 @@ import tkinter as tk
 from utils import make_2d_array
 
 class ChessBoardGUI(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, game):
         super().__init__(master)
+        self.game = game
         self.master = master
         self.pack(expand=True)
         self.initialize_components()
@@ -27,9 +28,9 @@ class ChessBoardGUI(tk.Frame):
         # do something
 
 
-def make_window():
+def make_window(game):
     root = tk.Tk()
     root.title("ChessIA")
     root.minsize(700, 400)
-    app = ChessBoardGUI(root)
+    app = ChessBoardGUI(root, game)
     app.mainloop()
