@@ -1,5 +1,5 @@
 from gui import make_window
-from logic import Game
+from game import Game
 
 game = Game()
 make_window(game)
