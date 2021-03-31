@@ -42,8 +42,11 @@ class ChessBoardGUI(tk.Frame):
         for x in range(0, 8):
             for y in range(0, 8):
                 bg = 'white' if (x + y) % 2 == 0 else 'black'
+                font = Font(size=25, weight='bold')
+
                 btn = tk.Button(self, bg=bg)
                 btn.grid(row=x, column=y, sticky='nesw')
+                btn['font'] = font
                 btn.bind("<Button-1>", self._click)
                 self.board_buttons[x][y] = btn
 
