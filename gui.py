@@ -15,6 +15,9 @@ class ChessBoardGUI(tk.Frame):
         super().__init__(master)
         self.game = game
         self.master = master
+        self.start_move = False
+        self.selected_spot_pos = None
+
         self.pack(expand=True)
         self.initialize_components()
         self.update_board_buttons()
@@ -56,7 +59,35 @@ class ChessBoardGUI(tk.Frame):
 
     def _click(self, event):
         sender = event.widget
-        # do something
+        position = sender.position
+
+        if self.start_move:
+            self._stop_move_piece(position)
+        else:
+            self._start_move_piece(sender, position)
+
+    def _stop_move_piece(self, position):
+        if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
+            result = self.game.move(self.selected_spot_pos, position)
+            if result is not None:
+                showinfo(title=TITLE, message=result)
+
+        self.update_board_buttons()
+        self.selected_spot_pos = None
+        self.start_move = False
+
+    def _start_move_piece(self, sender, position):
+        # no point on starting the selection if the place has nothing
+        if self.game.is_empty_spot(position):
+            return
+        
+        self.start_move = True
+        if sender is not None:
+            self.selected_spot_pos = position
+            self._select_square(sender)
+
+    def _select_square(self, button):
+        button['fg'] = 'green'
 
 
 def make_window(game):
