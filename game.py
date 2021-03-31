@@ -5,8 +5,6 @@ from color import Color
 
 class Game():
     def __init__(self):
-        # self.white_player = Piece(Color.WHITE)
-        # self.black_player = Piece(Color.BLACK)
         self.board = Board()
         self._turn = Color.WHITE
 
