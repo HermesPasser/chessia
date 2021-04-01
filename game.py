@@ -35,7 +35,7 @@ class Game():
 
         # the position has no piece
         if piece is None:
-            return 'there is nothing on selected spot'
+            return None
 
         # FIXME: selecting your own piece returns message instead of None, redo this
         # the clicked piece is from the other player
@@ -51,4 +51,5 @@ class Game():
 
         # TODO: check if the move was valid and computed it to change turn...
         self.change_turn()
-        return message if message == '' else None
+        
+        return message if message != '' else None
