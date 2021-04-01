@@ -9,10 +9,10 @@ class Piece():
         return self.to_unicode()
 
     def can_move(self, board, start : Position, end : Position) -> bool:
-        raise NotImplementedError('Not implemented')
+        raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
     def to_unicode(self):
-        raise NotImplementedError('Not implemented')
+        raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
     def is_white(self) -> bool:
         return self.color == Color.WHITE
