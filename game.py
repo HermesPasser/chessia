@@ -33,15 +33,15 @@ class Game():
         piece = self.board.get(from_pos.x, from_pos.y)
         message = ''
 
-        # the position has no piece
+        # the position has no piece so return w/o switching the turn
         if piece is None:
             return None
 
-        # FIXME: selecting your own piece returns message instead of None, redo this
         # the clicked piece is from the other player
-        # if piece.is_white() != self.get_current_turn():
-            # return 'the selected piece is not yours'
+        if piece.color != self.get_current_turn():
+            return None
         
+        # check if the piece can be moved on the spot
         if piece.can_move(self.board, from_pos, to_pos):
             prev = self.board._board[from_pos.x][from_pos.y]
             self.board._board[to_pos.x][to_pos.y] = prev
