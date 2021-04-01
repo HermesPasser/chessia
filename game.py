@@ -2,7 +2,15 @@ from utils import make_2d_array
 from position import Position
 from board import Board
 from color import Color
+from enum import Enum
 
+class MoveState(Enum):
+    # TODO: do i really need an enum for each type of move?
+    CAN_BE_PLACED = 0
+    CAN_NOT_BE_PLACED = 1
+    NO_PIECE_TO_MOVE = 2
+    NOT_YOUR_PIECE = 3
+    
 class Game():
     def __init__(self):
         self.board = Board()
@@ -17,8 +25,14 @@ class Game():
     def is_empty_spot(self, position : Position) -> bool:
         return self.board.is_empty_spot(position.x, position.y)
 
-    def move(self, from_pos : Position, to_pos : Position):
-        """Return None if the move could be done or a string with the explanaition if not"""
+    def _move(self, from_pos : Position, to_pos : Position):
+        prev = self.board._board[from_pos.x][from_pos.y]
+        prev.is_first_move = False
+        self.board._board[to_pos.x][to_pos.y] = prev
+        self.board._board[from_pos.x][from_pos.y] = None
+
+    def _check_move_state(self, from_pos : Position, to_pos : Position) -> MoveState:
+        """Return an enum corresponding to the state of the move."""
         # TODO: make the checks and delegate the important parts to Move and Piece
         # x check if from_pos has a piece
         # x check if from_pos' piece is from the current player
@@ -29,27 +43,31 @@ class Game():
         # check if from_pos' piece is the king and if putting it in to_pos put it in check
         # check if has a winner (?)
 
-
         piece = self.board.get(from_pos.x, from_pos.y)
-        message = ''
 
         # the position has no piece so return w/o switching the turn
         if piece is None:
-            return None
+            return MoveState.NO_PIECE_TO_MOVE
 
         # the clicked piece is from the other player
         if piece.color != self.get_current_turn():
-            return None
+            return MoveState.NOT_YOUR_PIECE
         
         # check if the piece can be moved on the spot
         if piece.can_move(self.board, from_pos, to_pos):
-            prev = self.board._board[from_pos.x][from_pos.y]
-            self.board._board[to_pos.x][to_pos.y] = prev
-            self.board._board[from_pos.x][from_pos.y] = None
-        else:
-            message = "the selected piece can't be place on the selected spot"
-
-        # TODO: check if the move was valid and computed it to change turn...
-        self.change_turn()
+            return MoveState.CAN_BE_PLACED
         
-        return message if message != '' else None
+        return MoveState.CAN_NOT_BE_PLACED 
+
+    def play_turn (self, from_pos : Position, to_pos : Position):      
+        rs = self._check_move_state(from_pos, to_pos)
+
+        if rs == MoveState.CAN_BE_PLACED:
+            self._move(from_pos, to_pos)
+            self.change_turn()
+        elif rs == MoveState.CAN_NOT_BE_PLACED:
+            raise Exception("The selected piece can't be place on the selected spot")
+        else:
+            pass # nothing
+        
+        

@@ -4,6 +4,7 @@ from color import Color
 class Piece():
     def __init__(self, color : Color):
         self.color = color
+        self.is_first_move = True
 
     def __repr__(self):
         return self.to_unicode()

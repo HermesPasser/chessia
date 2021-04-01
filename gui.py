@@ -68,9 +68,10 @@ class ChessBoardGUI(tk.Frame):
 
     def _stop_move_piece(self, position):
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
-            result = self.game.move(self.selected_spot_pos, position)
-            if result is not None:
-                showinfo(title=TITLE, message=result)
+            try:
+                self.game.play_turn(self.selected_spot_pos, position)
+            except Exception as e:
+                showinfo(title=TITLE, message=e)
 
         self.update_board_buttons()
         self.selected_spot_pos = None
