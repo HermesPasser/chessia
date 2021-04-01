@@ -52,3 +52,26 @@ class Knight(Piece):
 class Pawn(Piece):
     def to_unicode(self):
         return '♙' if self.color == Color.WHITE else '♟'
+
+    # TODO: handle pomotion and el passant   
+    def can_move(self, board, start, end):   
+        x = start.x - end.x
+        y = start.y - end.y
+        abs_x = abs(x)
+
+        # since the pawn can't go backwards we should
+        # known from where it came (white start on top)
+        can_descend = x < 0 and self.is_white()
+        can_ascend = x > 0 and not self.is_white()
+        is_in_right_direction = can_descend or can_ascend
+
+        # the pawn can only go straight (to y is always zero), 
+        # one spot at time (two if is its first move) so abs(x) 
+        # is one or two 
+        can_move_once = abs_x == 1
+        can_move_twice = abs_x == 2 and self.is_first_move
+
+        if y == 0 and is_in_right_direction and (can_move_once or can_move_twice):
+            return True  
+
+        return False
