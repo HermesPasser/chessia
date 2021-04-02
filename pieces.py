@@ -102,6 +102,15 @@ class Bishop(Piece):
 class Knight(Piece):
     def to_unicode(self):
         return '♘' if self.color == Color.WHITE else '♞'
+        
+    def can_move(self, board, start, end):
+        if self.has_same_color(board, end):
+            return False
+        
+        abs_x = abs(start.x - end.x)
+        abs_y = abs(start.y - end.y)
+        
+        return (abs_x == 2 and abs_y == 1) or (abs_x == 1 and abs_y == 2)
 
 
 class Pawn(Piece):
