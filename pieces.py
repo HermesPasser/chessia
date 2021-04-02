@@ -69,6 +69,21 @@ class Rook(Piece):
     def to_unicode(self):
         return '♖' if self.color == Color.WHITE else '♜'
 
+    # TODO: handle castling
+    def can_move(self, board, start, end):
+        # target_piece = board.get(end.x, end.y)
+        if self.has_same_color(board, end):
+            # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
+            return False
+        
+        abs_x = abs(start.x - end.x)
+        abs_y = abs(start.y - end.y)
+
+        can_move_x = abs_x != 0 and abs_y == 0
+        can_move_y = abs_x == 0 and abs_y != 0
+
+        return can_move_x or can_move_y
+
 
 class Bishop(Piece):        
     def to_unicode(self):
