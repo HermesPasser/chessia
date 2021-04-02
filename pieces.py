@@ -131,6 +131,14 @@ class Pawn(Piece):
         y = start.y - end.y
         abs_x = abs(x)
 
+        # it can't land on the diagonals unless there is a enemy piece in there
+        has_a_enemy_piece = self.has_not_same_color(board, end)
+
+        can_go_diagonally_left = ((x == -1 and y == 1) or (x == -1 and y == -1)) 
+        can_go_diagonally_right = ((x == 1 and y == 1) or (x == 1 and y == -1))
+        if  has_a_enemy_piece and (can_go_diagonally_left or can_go_diagonally_right):
+            return True
+
         # since the pawn can't go backwards we should
         # known from where it came (white start on top)
         can_descend = x < 0 and self.is_white()
@@ -143,7 +151,14 @@ class Pawn(Piece):
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
 
-        if y == 0 and is_in_right_direction and (can_move_once or can_move_twice):
+        if (
+                y == 0 and 
+                is_in_right_direction and 
+                (can_move_once or can_move_twice) and 
+                # the pawn can't land there if there is a enemy 
+                # on that square since pawns can only eat diagonally
+                not has_a_enemy_piece 
+            ):
             return True  
 
         return False
