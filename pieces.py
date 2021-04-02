@@ -1,6 +1,11 @@
 from position import Position
 from color import Color
 
+# TODO: prevent the move with multiple enemy
+# pieces or one of your own in the way (all pieces [pawn first 2-square move included] but king)
+# TODO: handle eating a pice on your way
+# when you move 2 squares or more (all pieces [pawn first 2-square move included] but king)   
+
 class Piece():
     def __init__(self, color : Color):
         self.color = color
@@ -27,6 +32,23 @@ class Piece():
 class King(Piece):
     def to_unicode(self):
         return '♔' if self.color == Color.WHITE else '♚'
+
+    # TODO: implement castling and prevent the
+    # king of moving to a place whre it can
+    # be in check
+    def can_move(self, board, start, end):
+        # target_piece = board.get(end.x, end.y)
+        
+        if self.has_same_color(board, end):
+            # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
+            return False
+        
+        abs_x = abs(start.x - end.x)
+        abs_y = abs(start.y - end.y)
+        can_move_x = abs_x == 1 and abs_y == 0
+        can_move_y = abs_x == 0 and abs_y == 1
+
+        return can_move_x or can_move_y
 
 
 class Queen(Piece):
