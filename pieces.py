@@ -108,8 +108,11 @@ class Pawn(Piece):
     def to_unicode(self):
         return '♙' if self.color == Color.WHITE else '♟'
 
-    # TODO: handle pomotion and el passant   
-    def can_move(self, board, start, end):   
+    # TODO: handle pomotion and el passant
+    def can_move(self, board, start, end):
+        if self.has_same_color(board, end):
+            return False
+        
         x = start.x - end.x
         y = start.y - end.y
         abs_x = abs(x)
@@ -121,7 +124,7 @@ class Pawn(Piece):
         is_in_right_direction = can_descend or can_ascend
 
         # the pawn can only go straight (to y is always zero), 
-        # one spot at time (two if is its first move) so abs(x) 
+        # one square at time (two if is its first move) so abs(x) 
         # is one or two 
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
