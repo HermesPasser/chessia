@@ -1,10 +1,5 @@
-"""
-
-"""
-
 from gui import make_window
+from game import Game
 
-
-
-
-make_window()
+game = Game()
+make_window(game)
