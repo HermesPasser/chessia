@@ -46,7 +46,8 @@ class Game():
         piece = self.board.get(from_pos.x, from_pos.y)
 
         # the position has no piece so return w/o switching the turn
-        if piece is None:
+        # or you didn't move
+        if piece is None or from_pos == to_pos:
             return MoveState.NO_PIECE_TO_MOVE
 
         # the clicked piece is from the other player
