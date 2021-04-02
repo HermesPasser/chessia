@@ -48,12 +48,15 @@ class King(Piece):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
             return False
         
+        # TODO: prevent king to move if it can be in check
+
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_x = abs_x == 1 and abs_y == 0
         can_move_y = abs_x == 0 and abs_y == 1
-
-        return can_move_x or can_move_y
+        can_move_diagonally = abs_x == 1 and abs_y == 1
+        
+        return can_move_diagonally or can_move_x or can_move_y
 
 
 class Queen(Piece):
