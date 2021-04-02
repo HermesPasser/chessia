@@ -8,7 +8,7 @@ class Board():
 
     def get(self, x: int, y: int):
         if x < 0 or x > 7 or y < 0 or y > 7:
-            raise Error("Index out of bound")
+            raise Exception("Index out of bound")
 
         return self._board[x][y]
 
