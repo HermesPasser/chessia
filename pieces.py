@@ -26,7 +26,12 @@ class Piece():
     def has_same_color(self, board, position : Position):
         """Checks if the piece on 'position' is from the same color of this instance"""
         piece = board.get(position.x, position.y)
-        return piece is not None and piece.is_white() == self.is_white()
+        return piece is not None and piece.color == self.color
+    
+    def has_not_same_color(self, board, position : Position):
+        """Checks if the piece on 'position' is not from the same color of this instance"""
+        piece = board.get(position.x, position.y)
+        return piece is not None and piece.color != self.color
             
 
 class King(Piece):
