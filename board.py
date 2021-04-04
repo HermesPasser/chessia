@@ -4,13 +4,15 @@ from pieces import *
 from io import StringIO
 
 class Board():
+    SIZE = 8
+
     def __init__(self):
         self._make_board()
 
     def __repr__(self):
         sio = StringIO()
         for _, y, p in self._iterate():
-            if y >= 7:
+            if y == Board.SIZE -1:
                 sio.write("\n")
                 continue
             
@@ -21,7 +23,8 @@ class Board():
         return s
 
     def get(self, x: int, y: int):
-        if x < 0 or x > 7 or y < 0 or y > 7:
+        # TODO: assert is y = 7 works and y = SIZE not
+        if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
             raise Exception("Index out of bound")
 
         return self._board[x][y]
