@@ -2,6 +2,7 @@ from utils import make_2d_array
 from position import Position
 from board import Board
 from color import Color
+from pieces import King
 from enum import Enum
 
 class MoveState(Enum):
@@ -10,6 +11,7 @@ class MoveState(Enum):
     CAN_NOT_BE_PLACED = 1
     NO_PIECE_TO_MOVE = 2
     NOT_YOUR_PIECE = 3
+    KING_IN_CHECK = 4
     
 class Game():
     def __init__(self):
@@ -36,14 +38,19 @@ class Game():
         # TODO: make the checks and delegate the important parts to Move and Piece
         # x check if from_pos has a piece
         # x check if from_pos' piece is from the current player
-        # check if from_pos' piece is the king and if it is in check
+        # x check if from_pos' piece is the king and if it is in check
         # check if from_pos' piece can be placed in to_pos
         # check if to_pos has no piece from the current player (if is not a special move)
         # check if to_pos is empty or has a piece from the other player
-        # check if from_pos' piece is the king and if putting it in to_pos put it in check
+        # x check if from_pos' piece is the king and if putting it in to_pos put it in check
         # check if has a winner (?)
 
         piece = self.board.get(from_pos.x, from_pos.y)
+
+        # prevent you from moving any piece that is not the king when it is in check
+        selected_piece_is_our_king = type(piece) is King and piece.color == self.get_current_turn()
+        if not selected_piece_is_our_king and self.board.in_check(self.get_current_turn()):
+            return MoveState.KING_IN_CHECK
 
         # the position has no piece so return w/o switching the turn
         # or you didn't move
@@ -68,6 +75,8 @@ class Game():
             self.change_turn()
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise Exception("The selected piece can't be place on the selected spot")
+        elif rs == MoveState.KING_IN_CHECK:
+            raise Exception(f"You can't move since the king is in check")
         else:
             pass # nothing
         

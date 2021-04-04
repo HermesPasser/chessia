@@ -48,6 +48,10 @@ class King(Piece):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
             return False
         
+        # the a enemy piece can reach, the king can't go
+        if board.is_square_in_check(self.color, end):
+            return False
+
         # TODO: prevent king to move if it can be in check
 
         abs_x = abs(start.x - end.x)
