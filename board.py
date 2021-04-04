@@ -32,6 +32,11 @@ class Board():
     def is_empty_spot(self, x, y):
         return self.get(x, y) is None
 
+    def _iterate(self):
+         for x in range(Board.SIZE):
+            for y in range(Board.SIZE):
+                yield x, y, self.get(x, y)
+
     def _remove_piece(self, piece):
         pass
 
