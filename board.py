@@ -1,10 +1,24 @@
 from utils import make_2d_array
 from color import Color
 from pieces import *
+from io import StringIO
 
 class Board():
     def __init__(self):
         self._make_board()
+
+    def __repr__(self):
+        sio = StringIO()
+        for _, y, p in self._iterate():
+            if y >= 7:
+                sio.write("\n")
+                continue
+            
+            p = '□' if p is None else str(p)
+            sio.write(p)
+        s = sio.getvalue()
+        sio.close()
+        return s
 
     def get(self, x: int, y: int):
         if x < 0 or x > 7 or y < 0 or y > 7:
