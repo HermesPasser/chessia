@@ -26,7 +26,12 @@ class Piece():
     def has_same_color(self, board, position : Position):
         """Checks if the piece on 'position' is from the same color of this instance"""
         piece = board.get(position.x, position.y)
-        return piece is not None and piece.is_white() == self.is_white()
+        return piece is not None and piece.color == self.color
+    
+    def has_not_same_color(self, board, position : Position):
+        """Checks if the piece on 'position' is not from the same color of this instance"""
+        piece = board.get(position.x, position.y)
+        return piece is not None and piece.color != self.color
             
 
 class King(Piece):
@@ -43,12 +48,19 @@ class King(Piece):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
             return False
         
+        # the a enemy piece can reach, the king can't go
+        if board.is_square_in_check(self.color, end):
+            return False
+
+        # TODO: prevent king to move if it can be in check
+
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_x = abs_x == 1 and abs_y == 0
         can_move_y = abs_x == 0 and abs_y == 1
-
-        return can_move_x or can_move_y
+        can_move_diagonally = abs_x == 1 and abs_y == 1
+        
+        return can_move_diagonally or can_move_x or can_move_y
 
 
 class Queen(Piece):
@@ -126,6 +138,14 @@ class Pawn(Piece):
         y = start.y - end.y
         abs_x = abs(x)
 
+        # it can't land on the diagonals unless there is a enemy piece in there
+        has_a_enemy_piece = self.has_not_same_color(board, end)
+
+        can_go_diagonally_left = ((x == -1 and y == 1) or (x == -1 and y == -1)) 
+        can_go_diagonally_right = ((x == 1 and y == 1) or (x == 1 and y == -1))
+        if  has_a_enemy_piece and (can_go_diagonally_left or can_go_diagonally_right):
+            return True
+
         # since the pawn can't go backwards we should
         # known from where it came (white start on top)
         can_descend = x < 0 and self.is_white()
@@ -138,7 +158,14 @@ class Pawn(Piece):
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
 
-        if y == 0 and is_in_right_direction and (can_move_once or can_move_twice):
+        if (
+                y == 0 and 
+                is_in_right_direction and 
+                (can_move_once or can_move_twice) and 
+                # the pawn can't land there if there is a enemy 
+                # on that square since pawns can only eat diagonally
+                not has_a_enemy_piece 
+            ):
             return True  
 
         return False
