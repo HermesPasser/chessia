@@ -12,7 +12,10 @@ class MoveState(Enum):
     NO_PIECE_TO_MOVE = 2
     NOT_YOUR_PIECE = 3
     KING_IN_CHECK = 4
-    
+
+class ChessException(Exception):
+    pass
+
 class Game():
     def __init__(self):
         self.board = Board()
@@ -74,9 +77,9 @@ class Game():
             self._move(from_pos, to_pos)
             self.change_turn()
         elif rs == MoveState.CAN_NOT_BE_PLACED:
-            raise Exception("The selected piece can't be place on the selected spot")
+            raise ChessException("The selected piece can't be place on the selected spot")
         elif rs == MoveState.KING_IN_CHECK:
-            raise Exception(f"You can't move since the king is in check")
+            raise ChessException(f"You can't move since the king is in check")
         else:
             pass # nothing
         
