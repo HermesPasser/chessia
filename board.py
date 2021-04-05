@@ -100,6 +100,56 @@ class Board():
     def is_empty_spot(self, x, y):
         return self.get(x, y) is None
 
+    def get_pieces_range_diagonal(self, origin_x : int, origin_y : int, end_x : int, end_y : int):
+        """ Returns a array of tuples with the coordinates from each piece and the piece itself whitin the (inclusive) range."""
+        diff_x = origin_x - end_x 
+        diff_y = origin_y - end_y
+        abs_x = abs(diff_x) 
+        abs_y = abs(diff_y)
+        valid_diagonal = abs_x == abs_y
+
+        if not valid_diagonal:
+            return []
+        
+        pieces = []
+
+        #nw(0,0)|ne(0,7)
+        #ms(7,0)|se(7,7)
+        increment_se = lambda x, y:(x+1, y+1)
+        increment_ms = lambda x, y:(x+1, y-1)
+        increment_nw = lambda x, y:(x-1, y-1)
+        increment_ne = lambda x, y:(x-1, y+1)
+        equals = lambda x1, y1, x2, y2: x1 == x2 and y1 == y2
+
+        current = None
+        if diff_x == diff_y and diff_x > 0:
+            current = increment_nw
+        elif diff_x == diff_y and diff_x < 0:
+            current = increment_se
+        elif diff_x < 0 < diff_y and abs_x == abs_y:
+            current = increment_ms
+        else: # diff_y < 0 < diff_x and abs_x == abs_y:
+            current = increment_ne
+
+        def append(x, y):
+            piece = self.get(x, y)
+            if piece is not None:
+                pieces.append((x, y, piece))
+        
+        x = origin_x
+        y = origin_y
+        while not equals(x, y, end_x, end_y):
+            assert(x < 8)
+            assert(y < 8)
+
+            append(x, y)
+            x , y = current(x, y)
+        # since we're inclusive (start..end)
+        else: 
+            append(end_x, end_y)
+     
+        return pieces
+
     def _iterate(self):
          for x in range(Board.SIZE):
             for y in range(Board.SIZE):
