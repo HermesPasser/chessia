@@ -139,9 +139,6 @@ class Board():
         x = origin_x
         y = origin_y
         while not equals(x, y, end_x, end_y):
-            assert(x < 8)
-            assert(y < 8)
-
             append(x, y)
             x , y = current(x, y)
         # since we're inclusive (start..end)
