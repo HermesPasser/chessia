@@ -100,6 +100,46 @@ class Board():
     def is_empty_spot(self, x, y):
         return self.get(x, y) is None
 
+    # TODO: create wrapper for vertical/horizontal/diagonal where we pass
+    # two Positions
+    # TODO: merge with vertical
+    # TODO: replace position by the x,y used
+    def get_pieces_range_horizontal(self, origin : Position, end : Position):
+        # TODO: rename variables
+        
+        move_to_right  = range(origin.y, end.y + 1)
+        move_to_left = range(end.y, origin.y + 1)
+        current_range = move_to_right if origin.y - end.y < 0 else move_to_left
+        
+        pieces = []
+        for y in current_range:
+            piece = self.get(origin.x, y)
+            if piece is not None:
+                pieces.append((piece, origin.x, y))
+
+        # ensure the list always start from the piece within
+        # origin and ends with the piece within the end
+        if current_range == move_to_left:
+            pieces.reverse()
+
+        return pieces
+
+    def get_pieces_range_vertical(self, origin : Position, end : Position):
+        descend = range(origin.x, end.x + 1)
+        ascend = range(end.x, origin.x + 1)
+        current_range = descend if origin.x - end.x < 0 else ascend
+        
+        pieces = []
+        for x in current_range:
+            piece = self.get(x, origin.y)
+            if piece is not None:
+                pieces.append((piece, x, origin.y))
+        
+        if current_range == ascend:
+            pieces.reverse()
+        
+        return pieces
+
     def get_pieces_range_diagonal(self, origin_x : int, origin_y : int, end_x : int, end_y : int):
         """ Returns a array of tuples with the coordinates from each piece and the piece itself whitin the (inclusive) range."""
         diff_x = origin_x - end_x 
