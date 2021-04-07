@@ -155,6 +155,11 @@ class Pawn(Piece):
         # the pawn can only go straight (to y is always zero), 
         # one square at time (two if is its first move) so abs(x) 
         # is one or two 
+
+        # since we can't check from the current pos since it would capture the pawn 
+        next_position = Position(start.x + (1 if can_descend else -1), start.y)
+ 
+        enemy_ahead = len(board.get_pieces_range_vertical(next_position, end)) > 0
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
 
@@ -164,7 +169,7 @@ class Pawn(Piece):
                 (can_move_once or can_move_twice) and 
                 # the pawn can't land there if there is a enemy 
                 # on that square since pawns can only eat diagonally
-                not has_a_enemy_piece 
+                not enemy_ahead
             ):
             return True  
 
