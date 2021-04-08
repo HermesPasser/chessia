@@ -111,7 +111,8 @@ class Rook(Piece):
         else:
             squares = board.get_pieces_range_vertical(start, end)
 
-        squares.pop(0) # remove itself
+        if squares:
+            squares.pop(0) # remove itself
 
         # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
         # 2 since one is self
