@@ -6,8 +6,10 @@ from io import StringIO
 class Board():
     SIZE = 8
 
-    def __init__(self):
-        self._make_board()
+    def __init__(self, pre_populate=True):
+        self._board = make_2d_array(range(Board.SIZE), None)
+        if pre_populate:
+            self._make_board()
 
     def __repr__(self):
         sio = StringIO()
@@ -23,11 +25,16 @@ class Board():
         return s
 
     def get(self, x: int, y: int):
-        # TODO: assert is y = 7 works and y = SIZE not
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
             raise Exception("Index out of bound")
 
         return self._board[x][y]
+
+    def set(self, x: int, y: int, piece : Piece):
+        if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
+            raise Exception("Index out of bound")
+
+        self._board[x][y] = piece
 
     def get_piece_location(self, color : Color, type_piece : type) -> Position:
         for x, y, p in self._iterate():
@@ -199,8 +206,7 @@ class Board():
         pass
 
     def _make_board(self):
-        self._board = make_2d_array(range(0, 8), None)
-        
+        # FIXME: the acess is [y][x] so i should rename in the other places
         self._board[0][0] = Rook(Color.WHITE)
         self._board[0][1] = Knight(Color.WHITE)
         self._board[0][2] = Bishop(Color.WHITE)
