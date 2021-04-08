@@ -68,14 +68,25 @@ class Queen(Piece):
         return '♕' if self.color == Color.WHITE else '♛'
 
     def can_move(self, board, start, end):
-        if self.has_same_color(board, end):
-            return False
-        
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_vertical = (abs_x != 0 and abs_y == 0) or (abs_x == 0 and abs_y != 0)
         can_move_diagonal = abs_x != 0 and abs_y != 0 and abs_x == abs_y
-        return can_move_vertical or can_move_diagonal
+
+        if can_move_diagonal:
+            squares = board.get_pieces_range_diagonal(start.x, start.y, end.x, end.y)
+        elif abs_x == 0 and abs_y > 0:
+            squares = board.get_pieces_range_horizontal(start, end)
+        else:
+            squares = board.get_pieces_range_vertical(start, end)
+   
+        if squares:
+            squares.pop(0) # pop self
+
+        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+
+        return (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
+
 
 class Rook(Piece):
     def to_unicode(self):
@@ -94,7 +105,19 @@ class Rook(Piece):
         can_move_x = abs_x != 0 and abs_y == 0
         can_move_y = abs_x == 0 and abs_y != 0
 
-        return can_move_x or can_move_y
+        # TODO: create get range origin exlusive
+        if not can_move_x and can_move_y:
+            squares = board.get_pieces_range_horizontal(start, end)
+        else:
+            squares = board.get_pieces_range_vertical(start, end)
+
+        squares.pop(0) # remove itself
+
+        # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
+        # 2 since one is self
+        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+
+        return (can_move_x or can_move_y) and not pieces_in_the_way
 
 
 class Bishop(Piece):        
@@ -104,11 +127,17 @@ class Bishop(Piece):
     def can_move(self, board, start, end):
         if self.has_same_color(board, end):
             return False
-        
+
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_diagonal = abs_x != 0 and abs_y != 0 and abs_x == abs_y
-        return can_move_diagonal
+
+        squares = board.get_pieces_range_diagonal(start.x, start.y, end.x, end.y)
+        if squares:
+            squares.pop(0) # remove itself
+        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+
+        return can_move_diagonal and not pieces_in_the_way
 
 
 class Knight(Piece):
@@ -155,6 +184,11 @@ class Pawn(Piece):
         # the pawn can only go straight (to y is always zero), 
         # one square at time (two if is its first move) so abs(x) 
         # is one or two 
+
+        # since we can't check from the current pos since it would capture the pawn 
+        next_position = Position(start.x + (1 if can_descend else -1), start.y)
+ 
+        enemy_ahead = len(board.get_pieces_range_vertical(next_position, end)) > 0
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
 
@@ -164,7 +198,7 @@ class Pawn(Piece):
                 (can_move_once or can_move_twice) and 
                 # the pawn can't land there if there is a enemy 
                 # on that square since pawns can only eat diagonally
-                not has_a_enemy_piece 
+                not enemy_ahead
             ):
             return True  
 

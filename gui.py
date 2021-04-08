@@ -3,7 +3,7 @@ from tkinter.font import Font
 from tkinter.messagebox import showinfo
 from position import Position
 from utils import make_2d_array
-from game import Game
+from game import Game, ChessException
 from board import Board
 from pieces import Piece
 from color import Color
@@ -70,7 +70,7 @@ class ChessBoardGUI(tk.Frame):
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
-            except Exception as e:
+            except ChessException as e:
                 showinfo(title=TITLE, message=e)
 
         self.update_board_buttons()
