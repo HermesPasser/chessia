@@ -94,7 +94,19 @@ class Rook(Piece):
         can_move_x = abs_x != 0 and abs_y == 0
         can_move_y = abs_x == 0 and abs_y != 0
 
-        return can_move_x or can_move_y
+        # TODO: create get range origin exlusive
+        if not can_move_x and can_move_y:
+            squares = board.get_pieces_range_horizontal(start, end)
+        else:
+            squares = board.get_pieces_range_vertical(start, end)
+
+        squares.pop(0) # remove itself
+
+        # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
+        # 2 since one is self
+        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+
+        return (can_move_x or can_move_y) and not pieces_in_the_way
 
 
 class Bishop(Piece):        
