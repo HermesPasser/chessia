@@ -68,14 +68,25 @@ class Queen(Piece):
         return '♕' if self.color == Color.WHITE else '♛'
 
     def can_move(self, board, start, end):
-        if self.has_same_color(board, end):
-            return False
-        
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_vertical = (abs_x != 0 and abs_y == 0) or (abs_x == 0 and abs_y != 0)
         can_move_diagonal = abs_x != 0 and abs_y != 0 and abs_x == abs_y
-        return can_move_vertical or can_move_diagonal
+
+        if can_move_diagonal:
+            squares = board.get_pieces_range_diagonal(start.x, start.y, end.x, end.y)
+        elif abs_x == 0 and abs_y > 0:
+            squares = board.get_pieces_range_horizontal(start, end)
+        else:
+            squares = board.get_pieces_range_vertical(start, end)
+   
+        if squares:
+            squares.pop(0) # pop self
+
+        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+
+        return (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
+
 
 class Rook(Piece):
     def to_unicode(self):
