@@ -174,7 +174,7 @@ class Board():
         def append(x, y):
             piece = self.get(x, y)
             if piece is not None:
-                pieces.append((x, y, piece))
+                pieces.append((piece, x, y))
         
         x = origin_x
         y = origin_y
