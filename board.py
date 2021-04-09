@@ -12,14 +12,14 @@ class Board():
             self._make_board()
 
     def __repr__(self):
+        # FIXME: i think is omitting something
         sio = StringIO()
         for _, y, p in self._iterate():
-            if y == Board.SIZE -1:
-                sio.write("\n")
-                continue
-            
             p = '□' if p is None else str(p)
             sio.write(p)
+            
+            if y == Board.SIZE -1:
+                sio.write("\n")
         s = sio.getvalue()
         sio.close()
         return s
