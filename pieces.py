@@ -11,6 +11,13 @@ class Piece():
         self.color = color
         self.is_first_move = True
 
+    def __eq__(self, other):
+        return (
+          isinstance(other, type(self)) 
+          and other.color == self.color
+          and other.is_first_move == self.is_first_move
+        )
+
     def __repr__(self):
         return self.to_unicode()
 
