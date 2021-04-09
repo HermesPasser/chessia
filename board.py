@@ -202,9 +202,6 @@ class Board():
     def _remove_piece(self, piece):
         pass
 
-    def _set_piece(self, piece):
-        pass
-
     def _make_board(self):
         # FIXME: the acess is [y][x] so i should rename in the other places
         self._board[0][0] = Rook(Color.WHITE)
