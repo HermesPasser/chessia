@@ -22,7 +22,7 @@ class Board():
                 sio.write("\n")
         s = sio.getvalue()
         sio.close()
-        return s
+        return s.strip()
 
     def get(self, x: int, y: int):
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
