@@ -7,46 +7,43 @@ def make_2d_array(range=range(0, 1), default=0):
 
 
 def load_board(board, text):
-    type = dict()
-    type['♔'] = pieces.King(Color.WHITE)
-    type['k'] = pieces.King(Color.WHITE)
-    type['♕'] = pieces.Queen(Color.WHITE)
-    type['q'] = pieces.Queen(Color.WHITE)
-    type['♖'] = pieces.Rook(Color.WHITE)
-    type['r'] = pieces.Rook(Color.WHITE)
-    type['♗'] = pieces.Bishop(Color.WHITE)
-    type['b'] = pieces.Bishop(Color.WHITE)
-    type['♘'] = pieces.Knight(Color.WHITE)
-    type['k'] = pieces.Knight(Color.WHITE)
-    type['♙'] = pieces.Pawn(Color.WHITE)
-    type['p'] = pieces.Pawn(Color.WHITE)
-    type['♚'] = pieces.King(Color.BLACK)
-    type['K'] = pieces.King(Color.BLACK)
-    type['♛'] = pieces.Queen(Color.BLACK)
-    type['Q'] = pieces.Queen(Color.BLACK)
-    type['♜'] = pieces.Rook(Color.BLACK)
-    type['R'] = pieces.Rook(Color.BLACK)
-    type['♝'] = pieces.Bishop(Color.BLACK)
-    type['B'] = pieces.Bishop(Color.BLACK)
-    type['♞'] = pieces.Knight(Color.BLACK)
-    type['K'] = pieces.Knight(Color.BLACK)
-    type['♟︎'] = pieces.Pawn(Color.BLACK)
-    type['P'] = pieces.Pawn(Color.BLACK)
+    kv = dict()
+    kv['♔'] = pieces.King(Color.WHITE)
+    kv['k']  = pieces.King(Color.WHITE)
+    kv['♕'] = pieces.Queen(Color.WHITE)
+    kv['q']  = pieces.Queen(Color.WHITE)
+    kv['♖'] = pieces.Rook(Color.WHITE)
+    kv['r']  = pieces.Rook(Color.WHITE)
+    kv['♗'] = pieces.Bishop(Color.WHITE)
+    kv['b']  = pieces.Bishop(Color.WHITE)
+    kv['♘'] = pieces.Knight(Color.WHITE)
+    kv['n']  = pieces.Knight(Color.WHITE)
+    kv['♙'] = pieces.Pawn(Color.WHITE)
+    kv['p']  = pieces.Pawn(Color.WHITE)
+    kv['♚'] = pieces.King(Color.BLACK)
+    kv['K']  = pieces.King(Color.BLACK)
+    kv['♛'] = pieces.Queen(Color.BLACK)
+    kv['Q']  = pieces.Queen(Color.BLACK)
+    kv['♜'] = pieces.Rook(Color.BLACK)
+    kv['R']  = pieces.Rook(Color.BLACK)
+    kv['♝'] = pieces.Bishop(Color.BLACK)
+    kv['B']  = pieces.Bishop(Color.BLACK)
+    kv['♞'] = pieces.Knight(Color.BLACK)
+    kv['N']  = pieces.Knight(Color.BLACK)
+    kv['♟︎'] = pieces.Pawn(Color.BLACK)
+    kv['P']  = pieces.Pawn(Color.BLACK)
     
     text = text.strip().replace("\n", '')
-    if len(text) != board.SIZE * board.SIZE -1:
-      raise Exception(f"string size ({len(text)}) does not match the board size ({board.SIZE * board.SIZE})")
+    if len(text) != board.SIZE * board.SIZE:
+        raise Exception(f"string size ({len(text)}) does not match the board size ({board.SIZE * board.SIZE})")
     
-    x = 0
-    y = 0
-    for c in text:
-      piece = type.get(c, False)
-      if not piece:
-        continue
+    i = 0
+    for x, y, _ in board._iterate():
+        piece = kv.get(text[i], False)
+
+        if piece:
+            # [x][y] or [y][x] i don't even know anymore
+            board.set(x, y, copy(piece))
       
-      # [x][y] or [y][x] i don't even know anymore
-      board.set(x, y, copy(piece))
-      x += 1
-      if x == board.SIZE:
-        x = 0
-        y += 1
+        i += 1  
+
