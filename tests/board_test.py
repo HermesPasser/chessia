@@ -1,7 +1,7 @@
 from pieces import *
 from color import Color
 from board import Board
-from utils import load_board, make_spots
+from utils import load_board, make_spots, piece_from_char
 import unittest
 
 class BoardTest(unittest.TestCase):
@@ -17,6 +17,18 @@ RNBQKBNR
 """  
     def setUp(self):
         self.board = Board(False)   
+
+    def actual_get_test(self, x, y, piece_char):
+        load_board(self.board, BoardTest.board_layout)
+        rs = self.board.get(x, y)
+        self.assertEqual(rs, piece_from_char(piece_char))
+
+    def test_get(self):
+        self.actual_get_test(0, 0, 'r')
+        self.actual_get_test(3, 3, 'Q')
+        self.actual_get_test(3, 6, None)
+        self.actual_get_test(7, 7, 'R')
+        self.actual_get_test(3, 0, None)
 
     def actual_vertical_test(self, start : Position, end : Position, expected):
         load_board(self.board, BoardTest.board_layout)
@@ -84,6 +96,3 @@ RNBQKBNR
     def test_get_pieces_range_diagonal_me_ms_empty(self):
         self.actual_diagonal_test(Position(4, 5), Position(2, 3), [])
 
-
-if __name__ == '__main__':
-   unittest.main()
