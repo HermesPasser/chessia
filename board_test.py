@@ -26,8 +26,14 @@ RNBQKBNR
     def test_get_pieces_range_vertical_top_bottom(self):
         self.actual_vertical_test(Position(1, 5), Position(6, 5), make_spots('p<1,5>', 'r<5,5>', 'P<6,5>'))
 
+    def test_get_pieces_range_vertical_top_bottom_empty(self):
+        self.actual_vertical_test(Position(2, 1), Position(3, 1), [])
+
     def test_get_pieces_range_vertical_bottom_top(self):
         self.actual_vertical_test(Position(7, 1), Position(6, 1), make_spots('N<7,1>', 'P<6,1>'))
+
+    def test_get_pieces_range_vertical_bottom_top_empty(self):
+        self.actual_vertical_test(Position(5, 0), Position(2, 0), [])
 
     def actual_horizontal_test(self, start : Position, end : Position, expected):
         load_board(self.board, BoardTest.board_layout)
@@ -37,8 +43,14 @@ RNBQKBNR
     def test_get_pieces_range_horizontal_left_right(self):
         self.actual_horizontal_test(Position(5, 1), Position(5, 5), make_spots('P<5,2>', 'B<5,3>', 'r<5,5>'))
 
+    def test_get_pieces_range_horizontal_left_right_empty(self):
+        self.actual_horizontal_test(Position(3, 0), Position(3, 2), [])
+
     def test_get_pieces_range_horizontal_right_left(self):
         self.actual_horizontal_test(Position(2, 6), Position(2, 2), make_spots('R<2,6>', 'k<2,2>'))
+
+    def test_get_pieces_range_horizontal_right_empty(self):
+        self.actual_horizontal_test(Position(4, 1), Position(4, 0), [])
 
     def actual_diagonal_test(self, position_start, position_end, expected):     
         load_board(self.board, BoardTest.board_layout)
@@ -48,17 +60,29 @@ RNBQKBNR
     def test_get_pieces_range_diagonal_nw_se_1(self):
         self.actual_diagonal_test(Position(2, 2), Position(5, 5), make_spots('k<2,2>', 'Q<3,3>', 'p<4,4>', 'r<5,5>'))
 
+    def test_get_pieces_range_diagonal_nw_se_2(self):
+        self.actual_diagonal_test(Position(6, 6), Position(3, 3), make_spots('r<5,5>', 'p<4,4>', 'Q<3,3>'))
+
+    def test_get_pieces_range_diagonal_nw_se_empty(self):
+        self.actual_diagonal_test(Position(2, 1), Position(4, 3), [])
+
     def test_get_pieces_range_diagonal_se_nw(self):
         self.actual_diagonal_test(Position(6, 4), Position(5, 3), make_spots('P<6,4>', 'B<5,3>'))
 
-    def test_get_pieces_range_diagonal_nw_se_2(self):
-        self.actual_diagonal_test(Position(6, 6), Position(3, 3), make_spots('r<5,5>', 'p<4,4>', 'Q<3,3>'))
+    def test_get_pieces_range_diagonal_se_nw_empty(self):
+        self.actual_diagonal_test(Position(5, 4), Position(3, 2), [])
 
     def test_get_pieces_range_diagonal_ms_ne(self):
         self.actual_diagonal_test(Position(5, 1), Position(1, 5), make_spots('p<4,2>', 'Q<3,3>', 'p<1,5>'))
 
+    def test_get_pieces_range_diagonal_ms_ne_empty(self):
+        self.actual_diagonal_test(Position(5, 0), Position(2, 3), [])
+
     def test_get_pieces_range_diagonal_me_ms(self):
         self.actual_diagonal_test(Position(4, 5), Position(0, 1), make_spots('p<1,2>', 'n<0,1>'))
+
+    def test_get_pieces_range_diagonal_me_ms_empty(self):
+        self.actual_diagonal_test(Position(4, 5), Position(2, 3), [])
 
 
 if __name__ == '__main__':
