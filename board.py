@@ -41,7 +41,7 @@ class Board():
             if type(p) is type_piece and p.color == color:
                 return Position(x, y)
 
-        raise Exception(f"No {color} {type} found")
+        raise Exception(f"No {color} {type_piece.__name__} found")
 
     def in_check(self, color):
         # TODO: too much computation, this and get_piece_location loops tru
