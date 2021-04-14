@@ -99,3 +99,105 @@ class KnightTests(unittest.TestCase):
             rs = knight.can_move(self.board, knight_pos, destination_pos)
             self.assertTrue(rs)
 
+# TODO: test invalid move when pawn try to go backwards
+# TODO: test the same stuff for black Pawn
+# TODO: figure out a way to get rid of the duplicate code
+# TODO: test pawn try to move where there is a piece
+class PawnTests(unittest.TestCase):
+    def setUp(self):
+        self.board = Board(False) 
+        self.board_layout_white = \
+            '===z====' +\
+            '===p====' +\
+            '==PyP===' +\
+            '===x====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' # z: 0x3 | P: 2x2 | x1: 2x3 | P: 2x4 | x2: 3x3 
+        
+        self.board_layout_black = \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===x====' +\
+            '===y====' +\
+            '==pxp===' +\
+            '===P====' +\
+            '===z====' 
+
+    def test_can_move_white_diagonal_left(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(2, 2)
+
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertTrue(rs)
+
+    def test_can_not_move_white_diagonal_left(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(2, 2)
+
+        self.board.set(destination_pos.x, destination_pos.y, None) # remove pawn from position
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertFalse(rs)
+
+    def test_can_move_white_diagonal_right(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(2, 4)
+
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertTrue(rs)
+
+    def test_can_not_move_white_diagonal_right(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(2, 4)
+
+        self.board.set(destination_pos.x, destination_pos.y, None) # remove pawn from position
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertFalse(rs)
+
+    def test_can_move_white_once(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(2, 3)
+
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertTrue(rs)
+
+    # TODO: test backwards twice
+    def test_can_not_move_white_once_backwards(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(0, 3)
+
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertFalse(rs)
+
+    def test_can_move_white_twice(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(3, 3)
+
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertTrue(rs)
+
+    def test_can_not_move_white_twice_because_is_2nd_move(self):
+        load_board(self.board, self.board_layout_white)
+        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        pawn = self.board.get(pawn_pos.x, pawn_pos.y)
+        destination_pos = Position(3, 3)
+
+        pawn.is_first_move = False
+        rs = pawn.can_move(self.board, pawn_pos, destination_pos)
+        self.assertFalse(rs)
