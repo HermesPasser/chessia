@@ -21,6 +21,9 @@ class Piece():
     def __repr__(self):
         return self.to_unicode()
 
+    # TODO: this is dump, why it need to receive a start to
+    # know if it can move? it make more sense to store its 
+    # location
     def can_move(self, board, start : Position, end : Position) -> bool:
         raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
