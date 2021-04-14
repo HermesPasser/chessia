@@ -2,9 +2,10 @@ from pieces import *
 from color import Color
 from board import Board
 from utils import load_board, make_spots, piece_from_char
+from tests import valid_moves
 import unittest
 
-class BoardTest(unittest.TestCase):
+class BoardTests(unittest.TestCase):
     board_layout = """
 rnbq=bnr
 pppppppp
@@ -18,8 +19,105 @@ RNBQKBNR
     def setUp(self):
         self.board = Board(False)   
 
+    def actual_is_in_check_returns_true(self, color, layout):
+        load_board(self.board, layout)
+        self.assertTrue(self.board.in_check(color))
+    
+    def test_is_in_check_white_returns_true(self):
+        layouts = []
+        layouts += valid_moves.bknight_checks_wking
+       
+        layouts.append(\
+          '===R====' +\
+          '========' +\
+          '===k====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===K====')
+        
+        layouts.append(\
+          '========' +\
+          '========' +\
+          '===k====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===Q====' +\
+          '===K====')
+        
+        layouts.append(\
+          '========' +\
+          '========' +\
+          '===k====' +\
+          '==B=====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===K====')
+
+        layouts.append(\
+          '========' +\
+          '========' +\
+          '===k====' +\
+          '==P=====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===K====')   
+        for l in layouts:
+            self.actual_is_in_check_returns_true(Color.WHITE, l)
+
+    def test_is_in_check_black_returns_true(self):
+        layouts = []
+        layouts += valid_moves.wknight_checks_bking
+       
+        layouts.append(\
+          '===r====' +\
+          '========' +\
+          '===K====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===k====')
+        
+        layouts.append(\
+          '========' +\
+          '========' +\
+          '===K====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===q====' +\
+          '===k====')
+        
+        layouts.append(\
+          '========' +\
+          '========' +\
+          '===K====' +\
+          '==b=====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===k====')
+
+        layouts.append(\
+          '========' +\
+          '====p===' +\
+          '===K====' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '========' +\
+          '===k====')
+
+        for l in layouts:
+            self.actual_is_in_check_returns_true(Color.BLACK, l)
+
     def actual_get_test(self, x, y, piece_char):
-        load_board(self.board, BoardTest.board_layout)
+        load_board(self.board, BoardTests.board_layout)
         rs = self.board.get(x, y)
         self.assertEqual(rs, piece_from_char(piece_char))
 
@@ -30,8 +128,25 @@ RNBQKBNR
         self.actual_get_test(7, 7, 'R')
         self.actual_get_test(3, 0, None)
 
+    def test_is_empty_spot_returns_true(self):
+        load_board(self.board, BoardTests.board_layout)
+        self.assertTrue(self.board.is_empty_spot(2, 0))
+        self.assertTrue(self.board.is_empty_spot(3, 1))
+        self.assertTrue(self.board.is_empty_spot(4, 6))
+        self.assertTrue(self.board.is_empty_spot(6, 2))
+        self.assertTrue(self.board.is_empty_spot(6, 6))
+
+    def test_is_empty_spot_returns_false(self):
+        load_board(self.board, BoardTests.board_layout)
+        self.assertFalse(self.board.is_empty_spot(0, 1))
+        self.assertFalse(self.board.is_empty_spot(5, 3))
+        self.assertFalse(self.board.is_empty_spot(5, 5))
+        self.assertFalse(self.board.is_empty_spot(6, 7))
+        self.assertFalse(self.board.is_empty_spot(0, 7))
+        self.assertFalse(self.board.is_empty_spot(7, 7))
+
     def actual_vertical_test(self, start : Position, end : Position, expected):
-        load_board(self.board, BoardTest.board_layout)
+        load_board(self.board, BoardTests.board_layout)
         rs = self.board.get_pieces_range_vertical(start, end)
         self.assertSequenceEqual(rs, expected)
 
@@ -48,7 +163,7 @@ RNBQKBNR
         self.actual_vertical_test(Position(5, 0), Position(2, 0), [])
 
     def actual_horizontal_test(self, start : Position, end : Position, expected):
-        load_board(self.board, BoardTest.board_layout)
+        load_board(self.board, BoardTests.board_layout)
         rs = self.board.get_pieces_range_horizontal(start, end)
         self.assertSequenceEqual(rs, expected)
 
@@ -65,7 +180,7 @@ RNBQKBNR
         self.actual_horizontal_test(Position(4, 1), Position(4, 0), [])
 
     def actual_diagonal_test(self, position_start, position_end, expected):     
-        load_board(self.board, BoardTest.board_layout)
+        load_board(self.board, BoardTests.board_layout)
         rs = self.board.get_pieces_range_diagonal(position_start.x, position_start.y, position_end.x, position_end.y)
         self.assertSequenceEqual(rs, expected)
 
@@ -95,4 +210,3 @@ RNBQKBNR
 
     def test_get_pieces_range_diagonal_me_ms_empty(self):
         self.actual_diagonal_test(Position(4, 5), Position(2, 3), [])
-
