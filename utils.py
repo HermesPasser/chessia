@@ -33,6 +33,10 @@ kv['♟︎'] = pieces.Pawn(Color.BLACK)
 kv['P']  = pieces.Pawn(Color.BLACK)
 
 
+def piece_from_char(char):
+    return copy(kv.get(char, None))
+
+
 # Note to self: if the serialized board has k or K it will
 # throw an exception because of the check mate logic, maybe
 # we should check it and throw an error somewhere
@@ -43,19 +47,15 @@ def load_board(board, text):
 
     i = 0
     for x, y, _ in board._iterate():
-        piece = kv.get(text[i], False)
+        piece = piece_from_char(text[i])
 
         if piece:
             # [x][y] or [y][x] i don't even know anymore
-            board.set(x, y, copy(piece))
+            board.set(x, y, piece)
         else: # since i may reload the board, is better i clean up the trash
             board.set(x, y, None)
         
         i += 1  
-
-
-def piece_from_char(char):
-    return copy(kv.get(char, None))
 
 
 def make_spot(text):
