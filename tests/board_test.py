@@ -6,6 +6,7 @@ from tests import valid_moves
 import unittest
 
 class BoardTests(unittest.TestCase):
+    # yes, the board is upside down so the pawns can't do much. I'm not fixing it
     board_layout = """
 rnbq=bnr
 pppppppp
@@ -18,6 +19,36 @@ RNBQKBNR
 """  
     def setUp(self):
         self.board = Board(False)   
+
+    def actual_is_square_in_check_returns_true(self, layout):
+        load_board(self.board, layout)
+
+        # the only purpose of the pawn is to get its position
+        target_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+        self.board.set(target_pos.x, target_pos.y, None)
+
+        self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
+    
+    def test_is_square_in_check_returns_true(self):
+        # add a pawn in the position to locate it
+        layouts = [layout
+            .replace('x', 'p')
+            for layout in valid_moves.checked_positions_no_pawn]
+        
+        # the pawn is tricky to test
+        layouts.append(\
+            'K=======' +\
+            '========' +\
+            '========' +\
+            '===N====' +\
+            '===P====' +\
+            '========' +\
+            '========' +\
+            'k=======' )
+
+        for l in layouts:
+            self.actual_is_square_in_check_returns_true(l)
+
 
     def actual_is_in_check_returns_true(self, color, layout):
         load_board(self.board, layout)

@@ -82,3 +82,52 @@ wknight_checks_bking = [layout
     .replace('y', 'n')
     .replace('w', 'k') # we don't need a piece in 'z'
     .replace('z', '=') for layout in knight_valid_moves]
+
+# ignoring the pawn sice it can only go in one direction
+# and this is made to be generic to replace the color from 
+# the pieces with a .replace()
+checked_positions_no_pawn = [
+    'K=======\n' +\
+    '========\n' +\
+    '========\n' +\
+    '===N====\n' +\
+    '=====x==\n' +\
+    '========\n' +\
+    '========\n' +\
+    'k=======\n' ,
+    
+    'K==x====\n' +\
+    '========\n' +\
+    '========\n' +\
+    '===R====\n' +\
+    '========\n' +\
+    '========\n' +\
+    '========\n' +\
+    'k=======\n' ,
+
+    'K=======\n' +\
+    '========\n' +\
+    '========\n' +\
+    '===B====\n' +\
+    '====x===\n' +\
+    '========\n' +\
+    '========\n' +\
+    'k=======\n' ,
+
+    'K=======\n' +\
+    '========\n' +\
+    '==x=====\n' +\
+    '===Q====\n' +\
+    '========\n' +\
+    '========\n' +\
+    '========\n' +\
+    'k=======\n' ,
+
+    'k=======\n' +\
+    '========\n' +\
+    '========\n' +\
+    '========\n' +\
+    '===x====\n' +\
+    '===K====\n' +\
+    '========\n' +\
+    '========\n' ]
