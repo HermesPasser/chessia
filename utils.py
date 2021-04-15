@@ -62,10 +62,10 @@ def make_spot(text):
     """Given a string p<x,y> where:
 
     p is a char representation of a piece
-    x and y are digit 
+    x and y are a digit 
     
     returns a tuple reprsenting a spot/square:
-    (int, int, pieces.Piece)
+    (pieces.Piece, int, int)
     """
     p, _, x, _, y, _ = list(text)
     return (piece_from_char(p), int(x), int(y))
