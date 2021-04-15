@@ -188,8 +188,8 @@ class Pawn(Piece):
 
         # since the pawn can't go backwards we should
         # known from where it came (white start on top)
-        can_descend = x < 0 and self.is_white()
-        can_ascend = x > 0 and not self.is_white()
+        can_descend = x < 0 and not self.is_white()
+        can_ascend = x > 0 and self.is_white()
         is_in_right_direction = can_descend or can_ascend
 
         # the pawn can only go straight (to y is always zero), 

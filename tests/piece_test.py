@@ -103,41 +103,33 @@ class KnightTests(unittest.TestCase):
 # TODO: test the same stuff for black Pawn
 # TODO: figure out a way to get rid of the duplicate code
 # TODO: test pawn try to move where there is a piece
+# TODO: eu inverti qual cor fica em cima, e por isso tenho
+# que inverter qual peça que deve descer
 class PawnTests(unittest.TestCase):
     def setUp(self):
         self.board = Board(False) 
-        self.board_layout_white = \
-            '===z====' +\
-            '===p====' +\
-            '==PyP===' +\
-            '===x====' +\
+        self.board_layout_black = \
+            '===Z====' +\
+            '===P====' +\
+            '==pYp===' +\
+            '===X====' +\
             '========' +\
             '========' +\
             '========' +\
             '========' # z: 0x3 | P: 2x2 | x1: 2x3 | P: 2x4 | x2: 3x3 
-        
-        self.board_layout_black = \
-            '========' +\
-            '========' +\
-            '========' +\
-            '===x====' +\
-            '===y====' +\
-            '==pxp===' +\
-            '===P====' +\
-            '===z====' 
 
-    def test_can_move_white_diagonal_left(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_move_black_diagonal_left(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(2, 2)
 
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertTrue(rs)
 
-    def test_can_not_move_white_diagonal_left(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_not_move_black_diagonal_left(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(2, 2)
 
@@ -145,18 +137,18 @@ class PawnTests(unittest.TestCase):
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertFalse(rs)
 
-    def test_can_move_white_diagonal_right(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_move_black_diagonal_right(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(2, 4)
 
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertTrue(rs)
 
-    def test_can_not_move_white_diagonal_right(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_not_move_black_diagonal_right(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(2, 4)
 
@@ -164,9 +156,9 @@ class PawnTests(unittest.TestCase):
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertFalse(rs)
 
-    def test_can_move_white_once(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_move_black_once(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(2, 3)
 
@@ -174,27 +166,27 @@ class PawnTests(unittest.TestCase):
         self.assertTrue(rs)
 
     # TODO: test backwards twice
-    def test_can_not_move_white_once_backwards(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_not_move_black_once_backwards(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(0, 3)
 
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertFalse(rs)
 
-    def test_can_move_white_twice(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_move_black_twice(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(3, 3)
 
         rs = pawn.can_move(self.board, pawn_pos, destination_pos)
         self.assertTrue(rs)
 
-    def test_can_not_move_white_twice_because_is_2nd_move(self):
-        load_board(self.board, self.board_layout_white)
-        pawn_pos = self.board.get_piece_location(Color.WHITE, Pawn)
+    def test_can_not_move_black_twice_because_is_2nd_move(self):
+        load_board(self.board, self.board_layout_black)
+        pawn_pos = self.board.get_piece_location(Color.BLACK, Pawn)
         pawn = self.board.get(pawn_pos.x, pawn_pos.y)
         destination_pos = Position(3, 3)
 
