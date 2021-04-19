@@ -32,6 +32,11 @@ kv['N']  = pieces.Knight(Color.BLACK)
 kv['♟︎'] = pieces.Pawn(Color.BLACK)
 kv['P']  = pieces.Pawn(Color.BLACK)
 
+# we will use the super class to represent a 
+# spot from where we want to recover the
+# position
+kv['0']  = pieces.Piece(Color.BLACK)
+
 
 def piece_from_char(char):
     return copy(kv.get(char, None))
