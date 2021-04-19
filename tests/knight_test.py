@@ -7,7 +7,7 @@ import unittest
 
 # TODO: there is lots os replication here, refactor
 # TODO: check for invalid moves later
-class KnightTests(unittest.TestCase):
+class KnightTest(unittest.TestCase):
     def setUp(self):
         self.board = Board(False)   
 
