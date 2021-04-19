@@ -164,15 +164,16 @@ class Knight(Piece):
         
         return (abs_x == 2 and abs_y == 1) or (abs_x == 1 and abs_y == 2)
 
-# FIXME: pawn can move to any diagonal and shoulnd
-# FIXME: figure out a way to detect the check of 
-# the pawn when there is no enemy (yes, the pawn
-# can't move to a place w/o piece in the diagonal
-# but the king can't be placed in a diagonal close
-# to the pawn, since it would put the king in check) 
+
 class Pawn(Piece):
+    color_that_descends = Color.BLACK
+
     def to_unicode(self):
         return '♙' if self.color == Color.WHITE else '♟'
+
+    def direction_is_down(self):
+        """Returns true if the piece starts at 2nd row and have to descend"""
+        return self.color == Pawn.color_that_descends
 
     # TODO: handle pomotion and el passant
     def can_move(self, board, start, end):
@@ -186,18 +187,18 @@ class Pawn(Piece):
         # it can't land on the diagonals unless there is a enemy piece in there
         has_a_enemy_piece = self.has_not_same_color(board, end)
 
-        can_go_diagonally_left = ((x == -1 and y == 1) or (x == -1 and y == -1)) 
-        can_go_diagonally_right = ((x == 1 and y == 1) or (x == 1 and y == -1))
-        if  has_a_enemy_piece and (can_go_diagonally_left or can_go_diagonally_right):
-            return True
-
         # since the pawn can't go backwards we should
-        # known from where it came (white start on top)
-        can_descend = x < 0 and not self.is_white()
-        can_ascend = x > 0 and self.is_white()
+        # know from where it came from
+        can_descend = x < 0 and self.direction_is_down()
+        can_ascend = x > 0 and not self.direction_is_down()
         is_in_right_direction = can_descend or can_ascend
 
-        # the pawn can only go straight (to y is always zero), 
+        can_go_diagonally_left = ((x == -1 and y == 1) or (x == -1 and y == -1)) and can_descend
+        can_go_diagonally_right = ((x == 1 and y == 1) or (x == 1 and y == -1)) and can_ascend
+        if has_a_enemy_piece and (can_go_diagonally_left or can_go_diagonally_right):
+            return True
+
+        # the pawn can only go straight (y is always zero), 
         # one square at time (two if is its first move) so abs(x) 
         # is one or two 
 
