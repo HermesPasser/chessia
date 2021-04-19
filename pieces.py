@@ -164,7 +164,12 @@ class Knight(Piece):
         
         return (abs_x == 2 and abs_y == 1) or (abs_x == 1 and abs_y == 2)
 
-
+# FIXME: pawn can move to any diagonal and shoulnd
+# FIXME: figure out a way to detect the check of 
+# the pawn when there is no enemy (yes, the pawn
+# can't move to a place w/o piece in the diagonal
+# but the king can't be placed in a diagonal close
+# to the pawn, since it would put the king in check) 
 class Pawn(Piece):
     def to_unicode(self):
         return '♙' if self.color == Color.WHITE else '♟'
