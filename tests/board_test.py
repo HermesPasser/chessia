@@ -7,53 +7,33 @@ import unittest
 
 class BoardTests(unittest.TestCase):
     # yes, the board is upside down so the pawns can't do much. I'm not fixing it
-    board_layout = """
-rnbq=bnr
-pppppppp
-==k===R=
-===Q====
-==p=p===
-==PB=r==
-PP=PPP=P
-RNBQKBNR
-"""  
+    board_layout = \
+        'rnbq=bnr\n' +\
+        'pppppppp\n' +\
+        '==k===R=\n' +\
+        '===Q====\n' +\
+        '==p=p===\n' +\
+        '==PB=r==\n' +\
+        'PP=PPP=P\n' +\
+        'RNBQKBNR\n'
+
     def setUp(self):
         self.board = Board(False)   
 
-    def actual_is_square_in_check_returns_true(self, layout):
-        load_board(self.board, layout)
-
-        # the only purpose of the pawn is to get its position
-        target_pos = self.board.get_piece_location(Color.WHITE, Pawn)
-        self.board.set(target_pos.x, target_pos.y, None)
-
-        self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
-    
     def test_is_square_in_check_returns_true(self):
-        # add a pawn in the position to locate it
-        layouts = [layout
-            .replace('x', 'p')
-            for layout in valid_moves.checked_positions_no_pawn]
-        
-        # the pawn is tricky to test
-        layouts.append(\
-            'K=======' +\
-            '========' +\
-            '========' +\
-            '===N====' +\
-            '===P====' +\
-            '========' +\
-            '========' +\
-            'k=======' )
+        for l in valid_moves.checked_positions:
+            load_board(self.board, l)
 
-        for l in layouts:
-            self.actual_is_square_in_check_returns_true(l)
-
+            # the only purpose of the 'piece' piece here is to get its position
+            target_pos = self.board.get_piece_location(Color.BLACK, Piece)
+            self.board.set(target_pos.x, target_pos.y, None)
+            
+            self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
 
     def actual_is_in_check_returns_true(self, color, layout):
         load_board(self.board, layout)
         self.assertTrue(self.board.in_check(color))
-    
+
     def test_is_in_check_white_returns_true(self):
         layouts = []
         layouts += valid_moves.bknight_checks_wking
@@ -100,13 +80,14 @@ RNBQKBNR
 
         layouts.append(\
           '========' +\
-          '========' +\
-          '===k====' +\
           '==P=====' +\
+          '===k====' +\
           '========' +\
           '========' +\
           '========' +\
-          '===K====')   
+          '========' +\
+          '===K====')
+
         for l in layouts:
             self.actual_is_in_check_returns_true(Color.WHITE, l)
 
@@ -156,9 +137,9 @@ RNBQKBNR
 
         layouts.append(\
           '========' +\
-          '====p===' +\
-          '===K====' +\
           '========' +\
+          '===K====' +\
+          '====p===' +\
           '========' +\
           '========' +\
           '========' +\
