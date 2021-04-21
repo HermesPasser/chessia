@@ -1,8 +1,6 @@
 from position import Position
 from color import Color
 
-# TODO: prevent the move with multiple enemy
-# pieces or one of your own in the way (all pieces [pawn first 2-square move included] but king)
 # TODO: handle eating a pice on your way
 # when you move 2 squares or more (all pieces [pawn first 2-square move included] but king)   
 
