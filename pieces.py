@@ -76,6 +76,9 @@ class Queen(Piece):
         return '♕' if self.color == Color.WHITE else '♛'
 
     def can_move(self, board, start, end):
+        if self.has_same_color(board, end):
+            return False
+        
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_vertical = (abs_x != 0 and abs_y == 0) or (abs_x == 0 and abs_y != 0)
