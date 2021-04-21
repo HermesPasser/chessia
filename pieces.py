@@ -1,5 +1,6 @@
 from position import Position
 from color import Color
+import math
 
 # TODO: handle eating a pice on your way
 # when you move 2 squares or more (all pieces [pawn first 2-square move included] but king)   
@@ -60,15 +61,23 @@ class King(Piece):
         if board.is_square_in_check(self.color, end):
             return False
 
-        # TODO: prevent king to move if it can be in check
+        piece = board.get(end.x, end.y)
+        king_on_target = isinstance(piece, King) and piece.color != self.color
 
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
         can_move_x = abs_x == 1 and abs_y == 0
         can_move_y = abs_x == 0 and abs_y == 1
         can_move_diagonally = abs_x == 1 and abs_y == 1
-        
-        return can_move_diagonally or can_move_x or can_move_y
+
+        distance = lambda p1, p2: abs(math.sqrt((p2.y - p1.y) * (p2.y - p1.y) + (p2.x - p1.x) * (p2.x - p1.x)))
+
+        # it must have at least, one square of distance between each king
+        other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
+        other_king_pos = board.get_piece_location(other_color, King)
+        other_king_too_close = distance(end, other_king_pos) < 2
+
+        return not king_on_target and not other_king_too_close and (can_move_diagonally or can_move_x or can_move_y)
 
 
 class Queen(Piece):
