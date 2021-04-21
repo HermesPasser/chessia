@@ -132,6 +132,10 @@ class Board():
         return pieces
 
     def get_pieces_range_vertical(self, origin : Position, end : Position):
+        trying_to_move_horizontally = origin.x - end.x < 0 and origin.y - end.y < 0
+        if trying_to_move_horizontally:
+            return []
+        
         descend = range(origin.x, end.x + 1)
         ascend = range(end.x, origin.x + 1)
         current_range = descend if origin.x - end.x < 0 else ascend
