@@ -242,3 +242,16 @@ class BoardTests(unittest.TestCase):
 
     def test_get_pieces_range_diagonal_me_ms_empty(self):
         self.actual_diagonal_test(Position(4, 5), Position(2, 3), [])
+
+    def test_reproduce_bug5(self):     
+        load_board(self.board, \
+            'KPPpPppk' +\
+            '========' +\
+            '========' +\
+            '===b====' +\
+            '========' +\
+            '========' +\
+            '=====P==' +\
+            '========')
+        # will fail if raises
+        self.board.in_check(Color.WHITE)
