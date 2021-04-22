@@ -20,15 +20,98 @@ class BoardTests(unittest.TestCase):
     def setUp(self):
         self.board = Board(False)   
 
-    def test_is_square_in_check_returns_true(self):
-        for l in valid_moves.checked_positions:
-            load_board(self.board, l)
+    def actual_is_square_in_check_returns_true(self, layout):
+        load_board(self.board, layout)
+        target_pos = self.board.get_piece_location(Color.BLACK, Piece)
+        self.board.set(target_pos.x, target_pos.y, None)
+        self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
 
-            # the only purpose of the 'piece' piece here is to get its position
-            target_pos = self.board.get_piece_location(Color.BLACK, Piece)
-            self.board.set(target_pos.x, target_pos.y, None)
-            
-            self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
+    def test_is_square_in_check_returns_true_pawn(self):
+        self.actual_is_square_in_check_returns_true(\
+            'K=======' +\
+            '========' +\
+            '====P===' +\
+            '===0====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            'k=======')
+
+        self.actual_is_square_in_check_returns_true(\
+            '===K====' +\
+            '========' +\
+            '===P====' +\
+            '====0===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '===k====')
+
+    def test_is_square_in_check_returns_true_knight(self):
+        self.actual_is_square_in_check_returns_true(\
+            'K=======\n' +\
+            '========\n' +\
+            '========\n' +\
+            '===N====\n' +\
+            '=====0==\n' +\
+            '========\n' +\
+            '========\n' +\
+            'k=======\n' )
+
+    def test_is_square_in_check_returns_true_rook(self):
+        self.actual_is_square_in_check_returns_true(\
+            'K==0====\n' +\
+            '========\n' +\
+            '========\n' +\
+            '===R====\n' +\
+            '========\n' +\
+            '========\n' +\
+            '========\n' +\
+            'k=======\n' )
+
+    def test_is_square_in_check_returns_true_bishop(self):
+        self.actual_is_square_in_check_returns_true(\
+            'K=======\n' +\
+            '========\n' +\
+            '========\n' +\
+            '===B====\n' +\
+            '====0===\n' +\
+            '========\n' +\
+            '========\n' +\
+            'k=======\n' )
+
+    def test_is_square_in_check_returns_true_queen(self):
+        self.actual_is_square_in_check_returns_true(\
+            'K=======\n' +\
+            '========\n' +\
+            '==0=====\n' +\
+            '===Q====\n' +\
+            '========\n' +\
+            '========\n' +\
+            '========\n' +\
+            'k=======\n')
+
+        self.actual_is_square_in_check_returns_true(\
+            'K=======\n' +\
+            '========\n' +\
+            '===0====\n' +\
+            '===Q====\n' +\
+            '========\n' +\
+            '========\n' +\
+            '========\n' +\
+            'k=======\n')
+
+    def test_is_square_in_check_returns_true_king(self):
+        self.actual_is_square_in_check_returns_true(\
+            # this is prone to err
+            'k=======\n' +\
+            '========\n' +\
+            '========\n' +\
+            '========\n' +\
+            '===0====\n' +\
+            '===K====\n' +\
+            '========\n' +\
+            '========\n')
 
     def actual_is_in_check_returns_true(self, color, layout):
         load_board(self.board, layout)

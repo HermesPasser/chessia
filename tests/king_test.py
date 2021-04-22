@@ -12,7 +12,7 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '=====k==')
             
         self.assertCanMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -22,7 +22,7 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '======K=')
             
         self.assertCanMoveToEmptySpot(King, Color.BLACK, \
             '========' +\
@@ -32,7 +32,7 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '=====k==')
             
         self.assertCanMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -42,7 +42,7 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '=======K')
             
         self.assertCanMoveToEmptySpot(King, Color.BLACK, \
             '========' +\
@@ -52,7 +52,7 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '====k===')
             
         self.assertCanMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -62,7 +62,7 @@ class KingTest(PieceTestBase):
             '====0===' +\
             '========' +\
             '========' +\
-            '========')
+            '=====K==')
             
         self.assertCanMoveToEmptySpot(King, Color.BLACK, \
             '========' +\
@@ -72,7 +72,7 @@ class KingTest(PieceTestBase):
             '===0====' +\
             '========' +\
             '========' +\
-            '========')
+            '===k====')
 
         self.assertCanMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -82,9 +82,10 @@ class KingTest(PieceTestBase):
             '==0=====' +\
             '========' +\
             '========' +\
-            '========')
+            '===K====')
 
     def test_can_not_twice(self):
+        #
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
             '========' +\
             '===0====' +\
@@ -93,11 +94,11 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '====k===')
 
     def test_can_not_move_rook_attaking_square(self):
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
-            '========' +\
+            '====k===' +\
             '========' +\
             '========' +\
             '========' +\
@@ -107,7 +108,7 @@ class KingTest(PieceTestBase):
             '===K====')
 
         self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
-            '========' +\
+            '===K====' +\
             '========' +\
             '========' +\
             '========' +\
@@ -125,7 +126,7 @@ class KingTest(PieceTestBase):
             '====0===' +\
             '========' +\
             '==b=====' +\
-            '========')
+            '=======k')
 
         self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -135,7 +136,7 @@ class KingTest(PieceTestBase):
             '====0===' +\
             '========' +\
             '==B=====' +\
-            '========')
+            '======K=')
 
     def test_can_not_move_knight_attaking_square(self):
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
@@ -146,7 +147,7 @@ class KingTest(PieceTestBase):
             '====0===' +\
             '==n=====' +\
             '========' +\
-            '========')
+            '======k=')
 
         self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -156,7 +157,7 @@ class KingTest(PieceTestBase):
             '====0===' +\
             '==N=====' +\
             '========' +\
-            '========')
+            '======K=')
 
     def test_can_not_move_pawn_attaking_square(self):
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
@@ -167,7 +168,7 @@ class KingTest(PieceTestBase):
             '===0====' +\
             '====p===' +\
             '========' +\
-            '========')
+            '=k======')
 
         self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
             '========' +\
@@ -177,4 +178,4 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
-            '========')
+            '==K=====')
