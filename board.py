@@ -44,65 +44,35 @@ class Board():
         raise Exception(f"No {color} {type_piece.__name__} found")
 
     def in_check(self, color):
-        # TODO: too much computation, this and get_piece_location loops tru
-        # the board, and since this is going to be called by the king,
-        # will have more loops since the king has to check the position
-        # where it will be in the future
-        # i can just reuse a version of this with a can_move for each piece
-        # in the places where the king will be since there is pieces (pawn)
-        # that can only move to a place where there is a piece
-
-        other_player_color = Color.BLACK if color == Color.WHITE else Color.WHITE
-        king_loc = self.get_piece_location(color, King)
-        
-        # since the game ends before the king is eaten the board not locating it
-        # doesn't make any sense
-        assert(king_loc != None)
-
-        # FIXME: loops thru like for piece in self._board: seems to be faster but
-        # i dont store the position anywhere yet so i had to do the 
-        # old way. Maybe create a spot/square wrapper or add a position
-        # to the piece class
-        for x, y, piece in self._iterate():
-            if piece is not None and piece.color == other_player_color: 
-                if piece.can_move(self, Position(x, y), king_loc):
-                    return True
-        
-        return False
+        return self.is_square_in_check(color, self.get_piece_location(color, King))
 
     # TODO: do we really need to let it here? Game and King
     # make sense having it but it deals with the internals 
     # of the board.
     def is_square_in_check(self, color, pos_to_check : Position):
-        p = self.get(pos_to_check.x, pos_to_check.y)
-        is_empty_spot = p is None
-        is_our_king = not is_empty_spot and p.color == color and type(p) != King
+        is_empty_spot = self.is_empty_spot(pos_to_check.x, pos_to_check.y)
+        other_player_color = Color.BLACK if color == Color.WHITE else Color.WHITE
+       
+        in_check = False
+        for x, y, piece in self._iterate():
+            if piece is not None and piece.color == other_player_color:                 
+                clear_spot = False
+
+                # Remember: the pawn eats diagonally and moves vertically
+                if isinstance(piece, Pawn) and is_empty_spot:
+                    clear_spot = True
+                    self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
+                
+                if piece.can_move(self, Position(x, y), pos_to_check, no_checks=True):
+                    in_check = True
+
+                if clear_spot:
+                    self.set(pos_to_check.x, pos_to_check.y, None)
+                
+                if in_check:
+                    break
         
-        if is_our_king:
-            return self.in_check(color)
-
-        # FIXME: do we need to check if the sport as a
-        # enemy piece? it really should return false 
-        # if there is
-        if not is_empty_spot:
-            return False
-
-        # TODO: create a method to get the piece directly
-        king_loc = self.get_piece_location(color, King)
-        our_king = self.get(king_loc.x, king_loc.y)
-
-        # move the king to the given position
-        self._board[pos_to_check.x][pos_to_check.y] = our_king
-        self._board[king_loc.x][king_loc.y] = None
-
-        # check if the king would be in check there
-        is_place_in_check = self.in_check(color)
-
-        # move the king back to its original position
-        self._board[pos_to_check.x][pos_to_check.y] = None
-        self._board[king_loc.x][king_loc.y] = our_king
-
-        return is_place_in_check
+        return in_check
 
     def is_empty_spot(self, x, y):
         return self.get(x, y) is None
