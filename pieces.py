@@ -1,5 +1,6 @@
 from position import Position
 from color import Color
+from move_result import MoveResult
 import math
 
 # TODO: handle eating a pice on your way
@@ -58,11 +59,11 @@ class King(Piece):
         
         if self.has_same_color(board, end):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
-            return False
+            return MoveResult(False)
         
         # the a enemy piece can reach, the king can't go
         if not no_checks and board.is_square_in_check(self.color, end):
-            return False
+            return MoveResult(False)
 
         piece = board.get(end.x, end.y)
         king_on_target = isinstance(piece, King) and piece.color != self.color
@@ -79,12 +80,17 @@ class King(Piece):
         other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
         other_king_pos = board.get_piece_location(other_color, King)
         other_king_too_close = distance(end, other_king_pos) < 2
+        
+        captured_piece = None
+        if piece and not king_on_target:
+            captured_piece = (piece, end)
 
-        return (
+        valid_move = (
             not king_on_target and
             not other_king_too_close and
             (can_move_diagonally or can_move_x or can_move_y)
         )
+        return MoveResult(valid_move, captured_piece)
 
 
 class Queen(Piece):
@@ -93,7 +99,7 @@ class Queen(Piece):
 
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
-            return False
+            return MoveResult(False)
         
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
@@ -111,8 +117,13 @@ class Queen(Piece):
             squares.pop(0) # pop self
 
         pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-
-        return (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
+        valid_move = (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
+        
+        captured_piece = None
+        if valid_move and len(squares) == 1:
+            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
+        
+        return MoveResult(valid_move, captured_piece)
 
 
 class Rook(Piece):
@@ -124,7 +135,7 @@ class Rook(Piece):
         # target_piece = board.get(end.x, end.y)
         if self.has_same_color(board, end):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
-            return False
+            return MoveResult(False)
         
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
@@ -144,8 +155,13 @@ class Rook(Piece):
         # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
         # 2 since one is self
         pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+        valid_move = (can_move_x or can_move_y) and not pieces_in_the_way
 
-        return (can_move_x or can_move_y) and not pieces_in_the_way
+        captured_piece = None
+        if valid_move and len(squares) == 1:
+            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
+
+        return MoveResult(valid_move, captured_piece)
 
 
 class Bishop(Piece):        
@@ -154,7 +170,7 @@ class Bishop(Piece):
 
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
-            return False
+            return MoveResult(False)
 
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
@@ -164,8 +180,13 @@ class Bishop(Piece):
         if squares:
             squares.pop(0) # remove itself
         pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
+        valid_move = can_move_diagonal and not pieces_in_the_way
 
-        return can_move_diagonal and not pieces_in_the_way
+        captured_piece = None
+        if valid_move and len(squares) == 1:
+            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
+
+        return MoveResult(valid_move, captured_piece)
 
 
 class Knight(Piece):
@@ -174,12 +195,17 @@ class Knight(Piece):
         
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
-            return False
-        
+            return MoveResult(False)
+
         abs_x = abs(start.x - end.x)
         abs_y = abs(start.y - end.y)
-        
-        return (abs_x == 2 and abs_y == 1) or (abs_x == 1 and abs_y == 2)
+        valid_move = (abs_x == 2 and abs_y == 1) or (abs_x == 1 and abs_y == 2)
+
+        captured_piece = None
+        if valid_move:
+            captured_piece = (board.get(end.x, end.y), end)
+
+        return MoveResult(valid_move, captured_piece)
 
 
 class Pawn(Piece):
@@ -195,7 +221,7 @@ class Pawn(Piece):
     # TODO: handle pomotion and el passant
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
-            return False
+            return MoveResult(False)
         
         x = start.x - end.x
         y = start.y - end.y
@@ -213,7 +239,8 @@ class Pawn(Piece):
         can_go_diagonally_left = ((x == -1 and y == 1) or (x == -1 and y == -1)) and can_descend
         can_go_diagonally_right = ((x == 1 and y == 1) or (x == 1 and y == -1)) and can_ascend
         if has_a_enemy_piece and (can_go_diagonally_left or can_go_diagonally_right):
-            return True
+            captured_piece = board.get(end.x, end.y)
+            return MoveResult(True, captured=(captured_piece, end))
 
         # the pawn can only go straight (y is always zero), 
         # one square at time (two if is its first move) so abs(x) 
@@ -226,14 +253,12 @@ class Pawn(Piece):
         can_move_once = abs_x == 1
         can_move_twice = abs_x == 2 and self.is_first_move
 
-        if (
-                y == 0 and 
-                is_in_right_direction and 
-                (can_move_once or can_move_twice) and 
-                # the pawn can't land there if there is a enemy 
-                # on that square since pawns can only eat diagonally
-                not enemy_ahead
-            ):
-            return True  
-
-        return False
+        valid_move = (
+            y == 0 and 
+            is_in_right_direction and 
+            (can_move_once or can_move_twice) and 
+            # the pawn can't land there if there is a enemy 
+            # on that square since pawns can only eat diagonally
+            not enemy_ahead
+        )
+        return MoveResult(valid_move)
