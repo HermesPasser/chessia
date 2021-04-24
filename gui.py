@@ -51,7 +51,7 @@ class ChessBoardGUI(tk.Frame):
                 btn.grid(row=x, column=y, sticky='nesw')
                 btn['font'] = font
                 btn.bind("<Button-1>", self._click)
-                
+                btn.config(width = 1 )
                 # create the property on the fly
                 btn.position = Position(x, y)
 
