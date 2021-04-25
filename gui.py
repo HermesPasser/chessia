@@ -82,7 +82,7 @@ class ChessBoardGUI(Qt.QMainWindow):
                 btn = self.board_buttons[r][c]
                 btn.setText(str(piece) if piece else '')
 
-                fg = '#dbdbdb' if piece and piece.color == Color.WHITE else '#404040'
+                fg = '#c9c9c9' if piece and piece.color == Color.WHITE else '#404040'
                 btn.set_foreground(fg)
 
         current_turn = 'white' if self.game.get_current_turn() == Color.WHITE else 'black'
