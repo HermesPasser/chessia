@@ -179,3 +179,104 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '==K=====')
+
+    def test_opposition(self):
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K====' +\
+            '===0====' +\
+            '===k====' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===k====' +\
+            '===0====' +\
+            '===K====' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K====' +\
+            '==0=====' +\
+            '===k====' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K====' +\
+            '====0===' +\
+            '===k====' +\
+            '========' +\
+            '========')
+       
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K0k==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+       
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===K=k==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===K=k==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K=k==' +\
+            '====0===' +\
+            '========' +\
+            '========' +\
+            '========')
+            
+        self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===K=k==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(King, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===K=k==' +\
+            '====0===' +\
+            '========' +\
+            '========' +\
+            '========')
