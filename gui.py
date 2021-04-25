@@ -1,6 +1,6 @@
-import tkinter as tk
-from tkinter.font import Font
-from tkinter.messagebox import showinfo
+import sys
+from functools import partial
+from PyQt5 import Qt, QtWidgets
 from position import Position
 from utils import make_2d_array
 from game import Game, ChessException
@@ -10,57 +10,74 @@ from color import Color
 
 TITLE = 'ChessIA'
 
-class ChessBoardGUI(tk.Frame):
-    def __init__(self, master, game):
-        super().__init__(master)
+class Button(Qt.QPushButton):
+    def __init__(self, text, parent=None):
+        super(Button, self).__init__(text, parent)
+        self._bg_color = 'white'
+        self._fg_color = 'black'
+
+        font = Qt.QFont("Times", 25, Qt.QFont.Bold)
+        self.setFont(font)
+        self.setText(text)
+        self.setMinimumSize(Qt.QSize(75, 75))
+
+    def set_background(self, color):
+        self._bg_color = color
+        self._update_style()
+
+    def set_foreground(self, color):
+        self._fg_color = color
+        self._update_style()
+
+    def _update_style(self):
+        self.setStyleSheet(f"background-color: {self._bg_color}; color: {self._fg_color}")
+
+        
+class ChessBoardGUI(Qt.QMainWindow):
+    def __init__(self, game):
+        super(ChessBoardGUI, self).__init__()
         self.game = game
-        self.master = master
         self.start_move = False
         self.selected_spot_pos = None
-
-        self.pack(expand=True)
-        self.initialize_components()
-        self.update_board_buttons()
-
-    def initialize_components(self):
+        self._initialize_component()
+    
+    def _initialize_component(self):
+        centralWidget = Qt.QWidget()
+        self.setCentralWidget(centralWidget)
+        self.layout = Qt.QGridLayout(centralWidget)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._initialize_board_buttons()
-
-    def update_board_buttons(self):
-        board = self.game.board
-
-        for x in range(0, 8):
-            for y in range(0, 8):
-                piece = board.get(x,y)
-                btn = self.board_buttons[x][y]
-                btn['text'] = piece or ''
-
-                if piece is not None:
-                    btn['fg'] = '#0b2a2e' if piece.is_white() else '#2e0e0b'
-
-        current_turn = 'white' if self.game.get_current_turn() == Color.WHITE else 'black'
-        self.master.title(f"{TITLE} - {current_turn} turn")
+        self.update_ui()
 
     def _initialize_board_buttons(self):
-        self.board_buttons = make_2d_array(range(0, 8), None)
-        for x in range(0, 8):
-            for y in range(0, 8):
-                bg = 'white' if (x + y) % 2 == 0 else 'black'
-                font = Font(size=25, weight='bold')
+        self.board_buttons = make_2d_array(range(0, 8), None)    
+        for r in range(0, 8):
+            for c in range(0, 8):
+                bg = 'white' if (r + c) % 2 == 0 else 'black'
+                btn = Button(f'{r}x{c}', self)
+                btn.set_background(bg)
+                btn.clicked.connect(partial(self._click, btn, Position(r, c)))
 
-                btn = tk.Button(self, bg=bg)
-                btn.grid(row=x, column=y, sticky='nesw')
-                btn['font'] = font
-                btn.bind("<Button-1>", self._click)
-                btn.config(width = 1 )
-                # create the property on the fly
-                btn.position = Position(x, y)
+                self.layout.addWidget(btn, r, c)
+                self.board_buttons[r][c] = btn
+    
+    def update_ui(self):
+        board = self.game.board
 
-                self.board_buttons[x][y] = btn
+        for r in range(0, 8):
+            for c in range(0, 8):
+                piece = board.get(r,c)
+                btn = self.board_buttons[r][c]
+                btn.setText(str(piece) if piece else '')
 
-    def _click(self, event):
-        sender = event.widget
-        position = sender.position
+                fg = '#dbdbdb' if piece and piece.color == Color.WHITE else '#404040'
+                btn.set_foreground(fg)
 
+        current_turn = 'white' if self.game.get_current_turn() == Color.WHITE else 'black'
+        self.setWindowTitle(f"{TITLE} - {current_turn} turn")
+
+    def _click(self, sender, position):
         if self.start_move:
             self._stop_move_piece(position)
         else:
@@ -71,9 +88,9 @@ class ChessBoardGUI(tk.Frame):
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
             except ChessException as e:
-                showinfo(title=TITLE, message=e)
+                QtWidgets.QMessageBox.about(self, TITLE, str(e))
 
-        self.update_board_buttons()
+        self.update_ui()
         self.selected_spot_pos = None
         self.start_move = False
 
@@ -88,12 +105,13 @@ class ChessBoardGUI(tk.Frame):
             self._select_square(sender)
 
     def _select_square(self, button):
-        button['fg'] = 'green'
+        button.set_foreground('green')
 
 
 def make_window(game):
-    root = tk.Tk()
-    root.title(TITLE)
-    root.minsize(700, 400)
-    app = ChessBoardGUI(root, game)
-    app.mainloop()
+    app = Qt.QApplication(sys.argv)
+    w = ChessBoardGUI(game)
+    w.setFixedSize(600, 600)
+    # w.setWindowTitle(TITLE)
+    w.show()
+    sys.exit(app.exec_())
