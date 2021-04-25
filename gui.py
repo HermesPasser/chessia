@@ -1,6 +1,6 @@
 import sys
 from functools import partial
-from PyQt5 import Qt, QtWidgets
+from PyQt5 import Qt, QtCore, QtWidgets
 from position import Position
 from utils import make_2d_array
 from game import Game, ChessException
@@ -19,7 +19,10 @@ class Button(Qt.QPushButton):
         font = Qt.QFont("Times", 25, Qt.QFont.Bold)
         self.setFont(font)
         self.setText(text)
-        self.setMinimumSize(Qt.QSize(75, 75))
+        self.set_size(75, 75)
+
+    def set_size(self, width, height):
+        self.setMinimumSize(Qt.QSize(width, height))
 
     def set_background(self, color):
         self._bg_color = color
@@ -34,14 +37,22 @@ class Button(Qt.QPushButton):
 
         
 class ChessBoardGUI(Qt.QMainWindow):
+    resized = QtCore.pyqtSignal()
+    
     def __init__(self, game):
         super(ChessBoardGUI, self).__init__()
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
         self._initialize_component()
-    
+  
+    def resizeEvent(self, event):
+        self.resized.emit()
+        super().resizeEvent(event)
+
     def _initialize_component(self):
+        self.resized.connect(self._on_resize)
+
         centralWidget = Qt.QWidget()
         self.setCentralWidget(centralWidget)
         self.layout = Qt.QGridLayout(centralWidget)
@@ -106,12 +117,16 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _select_square(self, button):
         button.set_foreground('green')
+  
+    def _on_resize(self):
+        for rows in self.board_buttons:
+            for b in rows:
+                b.set_size(self.width() / 8, self.height() / 8)
 
 
 def make_window(game):
     app = Qt.QApplication(sys.argv)
     w = ChessBoardGUI(game)
-    w.setFixedSize(600, 600)
-    # w.setWindowTitle(TITLE)
+    w.setMinimumSize(600, 600)
     w.show()
     sys.exit(app.exec_())
