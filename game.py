@@ -44,8 +44,7 @@ class Game():
         self.board.set(position.x, position.y, None)
 
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position) -> bool:
-        """ This will do the move, check if it make the king be in check, and then undo the move. """
-        
+        """ This will do the move, check if it make the king be in check, and then undo the move. """ 
         piece_on_destination = self.board.get(to_pos.x, to_pos.y)
         if piece_on_destination and piece_on_destination.color != self._turn:
             # it throws no (current color) king exception, so let's just prevent it
@@ -56,7 +55,7 @@ class Game():
 
         if result.captured:
             self._capture(result.captured_position)
-                
+
         piece_is_first_move = self.board.get(from_pos.x, from_pos.y).is_first_move
         self._move(from_pos, to_pos)
 
@@ -67,7 +66,7 @@ class Game():
 
         if result.captured:
             self.board.set(result.captured_position.x, result.captured_position.y, result.captured)
-        
+
         # since we're currently calling it even when the move isn't successful 
         # then we should keep track of any piece on the destination that may
         # get overwrited (if the piece is the captured then we don't need)
@@ -83,7 +82,7 @@ class Game():
         piece = self.board.get(from_pos.x, from_pos.y)
         selected_piece_is_our_king = type(piece) is King and piece.color == self.get_current_turn()
         is_in_check = self.board.in_check(self.get_current_turn())
-        
+
         # the position has no piece so return w/o switching the turn
         # or you didn't move
         if piece is None or from_pos == to_pos:
@@ -100,7 +99,7 @@ class Game():
 
             # prevent you from moving any piece that is not the king when it is in check
             # when the king is in check and the if move will not change it 
-            
+
             if not selected_piece_is_our_king and is_in_check and will_be_in_check:
                 return MoveState.KING_IN_CHECK, None 
             
