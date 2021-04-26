@@ -13,6 +13,8 @@ class MoveState(Enum):
     NOT_YOUR_PIECE = 3
     KING_IN_CHECK = 4
     KING_WILL_BE_IN_CHECK = 5
+    CHECK_MATE = 6
+    DRAW_BY_STALEMATE = 7
 
 class ChessException(Exception):
     pass
@@ -21,6 +23,7 @@ class Game():
     def __init__(self):
         self.board = Board()
         self._turn = Color.WHITE
+        self.game_ended = False
 
     def get_current_turn(self):
         return self._turn
@@ -79,7 +82,8 @@ class Game():
 
         piece = self.board.get(from_pos.x, from_pos.y)
         selected_piece_is_our_king = type(piece) is King and piece.color == self.get_current_turn()
-
+        is_in_check = self.board.in_check(self.get_current_turn())
+        
         # the position has no piece so return w/o switching the turn
         # or you didn't move
         if piece is None or from_pos == to_pos:
@@ -96,7 +100,7 @@ class Game():
 
             # prevent you from moving any piece that is not the king when it is in check
             # when the king is in check and the if move will not change it 
-            is_in_check = self.board.in_check(self.get_current_turn())
+            
             if not selected_piece_is_our_king and is_in_check and will_be_in_check:
                 return MoveState.KING_IN_CHECK, None 
             
@@ -114,7 +118,29 @@ class Game():
     
         return MoveState.CAN_NOT_BE_PLACED, None
 
-    def play_turn (self, from_pos : Position, to_pos : Position):      
+    def verify_for_check_mate(self, color) -> MoveState:
+        our_king_pos = self.board.get_piece_location(color, King)
+        our_king = self.board.get(our_king_pos.x, our_king_pos.y)
+
+        king_cant_move = False
+        pseudo_moves = our_king.get_pseudo_moves(our_king_pos)
+        for move in pseudo_moves:
+            if our_king.can_move(self.board, our_king_pos, move):
+                king_cant_move = True
+                break
+
+        if king_cant_move:
+            if self.board.in_check(color):
+                return MoveState.CHECK_MATE
+            
+            return MoveState.DRAW_BY_STALEMATE
+
+        return None
+
+    def play_turn (self, from_pos : Position, to_pos : Position):
+        if self.game_ended:
+            return None
+            
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
@@ -123,6 +149,20 @@ class Game():
 
             self._move(from_pos, to_pos)
             self.change_turn()
+
+            color = self._turn
+            rs = self.verify_for_check_mate(color)
+            if not rs:
+                color = color.reverse()
+                rs = self.verify_for_check_mate(color)
+
+            if rs == MoveState.CHECK_MATE:
+                self.game_ended = True
+                raise ChessException(f"CHECK-MATE\n{color} king can't defend himself")
+            elif rs == MoveState.DRAW_BY_STALEMATE:
+                self.game_ended = True
+                raise ChessException(f"Draw by stalemate")
+
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise ChessException("The selected piece can't be place on the selected spot")
         elif rs == MoveState.KING_IN_CHECK:
