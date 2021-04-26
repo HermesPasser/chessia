@@ -95,15 +95,19 @@ class ChessBoardGUI(Qt.QMainWindow):
             self._start_move_piece(sender, position)
 
     def _stop_move_piece(self, position):
+        message = False
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
             except ChessException as e:
-                QtWidgets.QMessageBox.about(self, TITLE, str(e))
+                message = str(e)
 
         self.update_ui()
         self.selected_spot_pos = None
         self.start_move = False
+
+        if message:
+            QtWidgets.QMessageBox.about(self, TITLE, message)
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
