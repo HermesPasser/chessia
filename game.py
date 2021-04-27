@@ -13,8 +13,6 @@ class MoveState(Enum):
     NOT_YOUR_PIECE = 3
     KING_IN_CHECK = 4
     KING_WILL_BE_IN_CHECK = 5
-    CHECK_MATE = 6
-    DRAW_BY_STALEMATE = 7
 
 class ChessException(Exception):
     pass
@@ -23,7 +21,6 @@ class Game():
     def __init__(self):
         self.board = Board()
         self._turn = Color.WHITE
-        self.game_ended = False
 
     def get_current_turn(self):
         return self._turn
@@ -45,18 +42,15 @@ class Game():
 
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
-        
-        piece_on_destination = self.board.get(to_pos.x, to_pos.y)
-        if piece_on_destination and piece_on_destination.color != self._turn:
-            # it throws no (current color) king exception, so let's just prevent it
-            # we could just prevent from clicking in the same color in the main method
-            # but we __need__ to handle castling in the future. This hack shows how
-            # many collateral effects this method (and the ones it calls) have
-            return False 
-
         if result.captured:
             self._capture(result.captured_position)
-                
+        
+        # since we're currently calling it even when the move isn't successful 
+        # then we should keep track of any piece on the destination that may
+        # get overwrited (if the piece is the captured then we don't need)
+        elif to_pos != result.captured_position:
+            piece_on_destination = self.board.get(to_pos.x, to_pos.y)
+        
         piece_is_first_move = self.board.get(from_pos.x, from_pos.y).is_first_move
         self._move(from_pos, to_pos)
 
@@ -68,12 +62,9 @@ class Game():
         if result.captured:
             self.board.set(result.captured_position.x, result.captured_position.y, result.captured)
         
-        # since we're currently calling it even when the move isn't successful 
-        # then we should keep track of any piece on the destination that may
-        # get overwrited (if the piece is the captured then we don't need)
         elif to_pos != result.captured_position:
             self.board.set(to_pos.x, to_pos.y, piece_on_destination)
-
+     
         return will_be_in_check
         
     def _check_move_state(self, from_pos : Position, to_pos : Position) -> (MoveState, MoveResult):
@@ -82,8 +73,7 @@ class Game():
 
         piece = self.board.get(from_pos.x, from_pos.y)
         selected_piece_is_our_king = type(piece) is King and piece.color == self.get_current_turn()
-        is_in_check = self.board.in_check(self.get_current_turn())
-        
+
         # the position has no piece so return w/o switching the turn
         # or you didn't move
         if piece is None or from_pos == to_pos:
@@ -100,7 +90,7 @@ class Game():
 
             # prevent you from moving any piece that is not the king when it is in check
             # when the king is in check and the if move will not change it 
-            
+            is_in_check = self.board.in_check(self.get_current_turn())
             if not selected_piece_is_our_king and is_in_check and will_be_in_check:
                 return MoveState.KING_IN_CHECK, None 
             
@@ -140,7 +130,7 @@ class Game():
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
             return None
-            
+
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:

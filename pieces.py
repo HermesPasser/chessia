@@ -53,20 +53,6 @@ class King(Piece):
     def to_unicode(self):
         return '♔' if self.color == Color.WHITE else '♚'
 
-    def get_pseudo_moves(self, current_pos):
-        """Returns all possible spots where you can place it without checking for in check state or for pieces on the spot"""
-        moves = []
-        moves.append(Position(current_pos.x, current_pos.y - 1))
-        moves.append(Position(current_pos.x, current_pos.y + 1))
-        moves.append(Position(current_pos.x + 1, current_pos.y))
-        moves.append(Position(current_pos.x + 1, current_pos.y - 1))
-        moves.append(Position(current_pos.x + 1, current_pos.y + 1))
-        moves.append(Position(current_pos.x - 1, current_pos.y))
-        moves.append(Position(current_pos.x - 1, current_pos.y - 1))
-        moves.append(Position(current_pos.x - 1, current_pos.y + 1))
-        in_range = lambda x: x > -1 and x < 8
-        return [move for move in moves if in_range(move.x) and in_range(move.y)]
-
     # TODO: implement castling and prevent the
     def can_move(self, board, start, end, no_checks=False):
         # target_piece = board.get(end.x, end.y)
