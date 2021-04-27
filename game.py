@@ -133,7 +133,7 @@ class Game():
             if self.board.in_check(color):
                 return MoveState.CHECK_MATE
             
-            return MoveState.DRAW_BY_STALEMATE
+            # return MoveState.DRAW_BY_STALEMATE
 
         return None
 
@@ -159,9 +159,9 @@ class Game():
             if rs == MoveState.CHECK_MATE:
                 self.game_ended = True
                 raise ChessException(f"CHECK-MATE\n{color} king can't defend himself")
-            elif rs == MoveState.DRAW_BY_STALEMATE:
-                self.game_ended = True
-                raise ChessException(f"Draw by stalemate")
+            # elif rs == MoveState.DRAW_BY_STALEMATE:
+            #     self.game_ended = True
+            #     raise ChessException(f"Draw by stalemate")
 
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise ChessException("The selected piece can't be place on the selected spot")
