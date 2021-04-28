@@ -168,6 +168,11 @@ class Board():
      
         return pieces
 
+    def iterate_material(self, color : Color):
+        for x, y, p in self._iterate():
+            if p and p.color == color:
+                yield p, Position(x, y)
+
     def _iterate(self):
          for x in range(Board.SIZE):
             for y in range(Board.SIZE):

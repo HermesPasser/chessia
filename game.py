@@ -52,6 +52,26 @@ class Game():
         
         self.moves.append(move)
 
+    def get_moves(self, color) -> MoveResult:
+        # loop tru all pieces from a color
+        moves = []
+        for p, pos in self.board.iterate_material(color):
+            pseudo_moves = p.get_pseudo_moves(pos)
+
+            # from the pseudo moves, get the ones that can be made
+            for pseudo in pseudo_moves:
+                
+                if isinstance(p, King):
+                    # FIXME: lets forget the king for now because of the No Color found bug
+                    continue
+                
+                if result := p.can_move(self.board, pos, pseudo):
+                    
+                    result.set_moved_piece(p, pos, pseudo, p.is_first_move)
+                    moves.append(result)
+        
+        return moves
+
     def undo(self):
         # undo a move
         if len(self.moves) == 0:
