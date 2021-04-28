@@ -24,6 +24,7 @@ class Game():
         self.board = Board()
         self._turn = Color.WHITE
         self.game_ended = False
+        self.moves = []
 
     def get_current_turn(self):
         return self._turn
@@ -34,15 +35,36 @@ class Game():
     def is_empty_spot(self, position : Position) -> bool:
         return self.board.is_empty_spot(position.x, position.y)
 
-    def _move(self, from_pos : Position, to_pos : Position):
+    def _capture(self, position : Position):
+        self.board.set(position.x, position.y, None)
+
+    def _move(self, from_pos : Position, to_pos : Position):        
         prev = self.board._board[from_pos.x][from_pos.y]
         prev.is_first_move = False
         self.board._board[to_pos.x][to_pos.y] = prev
         self.board._board[from_pos.x][from_pos.y] = None
 
-    def _capture(self, position : Position):
-        self.board.set(position.x, position.y, None)
+    def move(self, move : MoveResult):
+        if move.captured:
+            self._capture(move.captured_position)
 
+        self._move(move.from_pos, move.to_pos)
+        
+        self.moves.append(move)
+
+    def undo(self):
+        # undo a move
+        if len(self.moves) == 0:
+            return
+        
+        move = self.moves.pop()
+
+        self._move(move.to_pos, move.from_pos)
+        self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
+        if move.captured:
+            self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
+
+        
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
         
@@ -147,7 +169,9 @@ class Game():
             if mr.captured:
                 self._capture(mr.captured_position)
 
-            self._move(from_pos, to_pos)
+            piece = self.board.get(from_pos.x, from_pos.y)
+            mr.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
+            self.move(mr)
             self.change_turn()
 
             color = self._turn
