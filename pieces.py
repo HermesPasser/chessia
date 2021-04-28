@@ -57,6 +57,34 @@ class Piece():
         """Checks if the piece on 'position' is not from the same color of this instance"""
         piece = board.get(position.x, position.y)
         return piece is not None and piece.color != self.color
+
+    def handle_jump_over_pieces(self, board, end : Position, squares : list) -> MoveResult:
+        """Given a list of spots/squares (Piece, Position) it returns a result move if is no piece was jumped over
+        It assumes if is not empty, then the first the piece who called the method.
+        """
+        if squares:
+            squares.pop(0) # pop self
+
+        jumped_over_pieces = len(squares) > 1
+        if jumped_over_pieces:
+            return MoveResult(False)  
+        
+        captured_piece = None
+        if len(squares) == 1:
+            landed_spot = Position(squares[0][1], squares[0][2]) 
+            landed_piece = squares[0][0]
+            
+            jumped_over_a_piece = landed_spot != end
+            if jumped_over_a_piece:
+                return MoveResult(False)
+            
+            landed_on_friend = landed_piece.color == self.color
+            if landed_on_friend:
+                return MoveResult(False)
+            
+            captured_piece = (landed_piece, landed_spot)
+             
+        return MoveResult(True, captured_piece)  
             
 
 class King(Piece):
@@ -143,18 +171,12 @@ class Queen(Piece):
             squares = board.get_pieces_range_horizontal(start, end)
         else:
             squares = board.get_pieces_range_vertical(start, end)
-   
-        if squares:
-            squares.pop(0) # pop self
 
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
-        
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
-        
-        return MoveResult(valid_move, captured_piece)
+        valid_move = (can_move_vertical or can_move_diagonal)
+        if not valid_move:
+            return MoveResult(False)
+
+        return self.handle_jump_over_pieces(board, end, squares)
 
 
 class Rook(Piece):
@@ -207,19 +229,11 @@ class Rook(Piece):
         else:
             squares = board.get_pieces_range_vertical(start, end)
 
-        if squares:
-            squares.pop(0) # remove itself
+        valid_move = (can_move_x or can_move_y)
+        if not valid_move:
+            return MoveResult(False)
 
-        # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
-        # 2 since one is self
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = (can_move_x or can_move_y) and not pieces_in_the_way
-
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
-
-        return MoveResult(valid_move, captured_piece)
+        return self.handle_jump_over_pieces(board, end, squares)  
 
 
 class Bishop(Piece):  
@@ -262,16 +276,12 @@ class Bishop(Piece):
         can_move_diagonal = abs_x != 0 and abs_y != 0 and abs_x == abs_y
 
         squares = board.get_pieces_range_diagonal(start.x, start.y, end.x, end.y)
-        if squares:
-            squares.pop(0) # remove itself
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = can_move_diagonal and not pieces_in_the_way
 
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
+        valid_move = can_move_diagonal
+        if not valid_move:
+            return MoveResult(False)
 
-        return MoveResult(valid_move, captured_piece)
+        return self.handle_jump_over_pieces(board, end, squares)
 
 
 class Knight(Piece):

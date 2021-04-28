@@ -44,7 +44,7 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_diagonally_ally_piece_in_the_way(self):
+    def test_can_not_move_diagonally_piece_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
             '========' +\
             '=====0==' +\
@@ -53,6 +53,26 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========' +\
             '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
+            '========' +\
+            '=====0==' +\
+            '====P===' +\
+            '===q====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Queen, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===Q====' +\
+            '========' +\
+            '=p======' +\
+            '0=======' +\
             '========')
 
         self.assertCanNotMoveToEmptySpot(Queen, Color.BLACK, \
@@ -74,6 +94,16 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========' +\
             '========')
+    
+        self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
+            '========' +\
+            '=0======' +\
+            '==P=====' +\
+            '===q====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
 
         self.assertCanNotMoveToEmptySpot(Queen, Color.BLACK, \
             '========' +\
@@ -85,7 +115,16 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_diagonally_too_many_enemy_pieces_in_the_way(self):
+        self.assertCanNotMoveToEmptySpot(Queen, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===Q====' +\
+            '====p===' +\
+            '=====0==' +\
+            '========' +\
+            '========')
+
         self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
             '======0=' +\
             '=====P==' +\
@@ -109,7 +148,7 @@ class QueenTest(PieceTestBase):
         self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
             '0=======' +\
             '=P======' +\
-            '==P=====' +\
+            '==p=====' +\
             '===q====' +\
             '========' +\
             '========' +\
@@ -122,7 +161,7 @@ class QueenTest(PieceTestBase):
             '========' +\
             '===Q====' +\
             '====p===' +\
-            '=====p==' +\
+            '=====P==' +\
             '======0=' +\
             '========')
 
@@ -311,7 +350,7 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_vertically_ally_piece_in_the_way(self):
+    def test_can_not_move_vertically_piece_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Queen, Color.WHITE, \
             '========' +\
             '========' +\
@@ -332,7 +371,7 @@ class QueenTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_horizontally_ally_piece_in_the_way(self):
+    def test_can_not_move_horizontally_piece_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Queen, Color.BLACK, \
             '========' +\
             '========' +\

@@ -44,11 +44,22 @@ class BishopTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_ally_piece_in_the_way(self):
+    def test_can_not_move_piece_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Bishop, Color.WHITE, \
             '========' +\
             '=====0==' +\
             '====p===' +\
+            '===b====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+    def test_can_not_move_piece_in_the_way(self):
+        self.assertCanNotMoveToEmptySpot(Bishop, Color.WHITE, \
+            '========' +\
+            '=====0==' +\
+            '====P===' +\
             '===b====' +\
             '========' +\
             '========' +\
@@ -63,6 +74,26 @@ class BishopTest(PieceTestBase):
             '========' +\
             '=P======' +\
             '0=======' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Bishop, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===B====' +\
+            '========' +\
+            '=p======' +\
+            '0=======' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Bishop, Color.WHITE, \
+            '========' +\
+            '=0======' +\
+            '==P=====' +\
+            '===b====' +\
+            '========' +\
+            '========' +\
+            '========' +\
             '========')
 
         self.assertCanNotMoveToEmptySpot(Bishop, Color.WHITE, \
@@ -80,12 +111,21 @@ class BishopTest(PieceTestBase):
             '========' +\
             '========' +\
             '===B====' +\
+            '====p===' +\
+            '=====0==' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Bishop, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===B====' +\
             '====P===' +\
             '=====0==' +\
             '========' +\
             '========')
 
-    def test_can_not_move_too_many_enemy_pieces_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Bishop, Color.WHITE, \
             '======0=' +\
             '=====P==' +\
