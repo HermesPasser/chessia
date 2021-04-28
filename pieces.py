@@ -23,6 +23,10 @@ class Piece():
     def __repr__(self):
         return self.to_unicode()
 
+    def get_value(self) -> int:
+        """Returns how valuable the piece is"""
+        raise NotImplementedError(f"Not implemented for '{type(self)}'")
+
     def get_pseudo_moves(self, current_pos) -> list:
         """Returns all possible spots where you can place it without any validation"""
         raise NotImplementedError(f"Not implemented for '{type(self)}'")
@@ -58,6 +62,9 @@ class Piece():
 class King(Piece):
     def to_unicode(self):
         return '♔' if self.color == Color.WHITE else '♚'
+
+    def get_value(self):
+        return 10000
 
     def get_pseudo_moves(self, current_pos) -> list:
         moves = []
@@ -115,6 +122,9 @@ class Queen(Piece):
     def to_unicode(self):
         return '♕' if self.color == Color.WHITE else '♛'
     
+    def get_value(self):
+        return 1000
+
     def get_pseudo_moves(self, current_pos) -> list:
         return Rook(self.color).get_pseudo_moves(current_pos) + Bishop(self.color).get_pseudo_moves(current_pos)
 
@@ -150,7 +160,10 @@ class Queen(Piece):
 class Rook(Piece):
     def to_unicode(self):
         return '♖' if self.color == Color.WHITE else '♜'
-  
+
+    def get_value(self):
+        return 525
+
     def get_pseudo_moves(self, current_pos) -> list:       
         move_to_right = range(current_pos.y, 8)
         move_to_left = range(0, current_pos.y + 1)
@@ -209,9 +222,12 @@ class Rook(Piece):
         return MoveResult(valid_move, captured_piece)
 
 
-class Bishop(Piece):        
+class Bishop(Piece):  
     def to_unicode(self):
         return '♗' if self.color == Color.WHITE else '♝'
+
+    def get_value(self):
+        return 350
 
     def get_pseudo_moves(self, current_pos) -> list:
         moves = []
@@ -262,6 +278,9 @@ class Knight(Piece):
     def to_unicode(self):
         return '♘' if self.color == Color.WHITE else '♞'
 
+    def get_value(self):
+        return 350
+
     def get_pseudo_moves(self, current_pos) -> list:
         moves = []
         moves.append(Position(current_pos.x - 1, current_pos.y + 2))
@@ -292,6 +311,16 @@ class Knight(Piece):
 class Pawn(Piece):
     color_that_descends = Color.BLACK
 
+    def get_value(self):
+        return 100
+
+    def to_unicode(self):
+        return '♙' if self.color == Color.WHITE else '♟'
+
+    def direction_is_down(self):
+        """Returns true if the piece starts at 2nd row and have to descend"""
+        return self.color == Pawn.color_that_descends
+
     def get_pseudo_moves(self, current_pos) -> list:
         descend = self.direction_is_down()
         moves = []
@@ -313,13 +342,6 @@ class Pawn(Piece):
                 moves.append(Position(current_pos.x - 2, current_pos.y))
 
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
-
-    def to_unicode(self):
-        return '♙' if self.color == Color.WHITE else '♟'
-
-    def direction_is_down(self):
-        """Returns true if the piece starts at 2nd row and have to descend"""
-        return self.color == Pawn.color_that_descends
 
     # TODO: handle pomotion and el passant
     def can_move(self, board, start, end, no_checks=False):
