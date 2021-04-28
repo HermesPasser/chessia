@@ -108,6 +108,23 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+        else:
+            # if no error message is shown then the turn was played sucefully
+            self.handle_and_animate_ia_move()
+
+    def handle_and_animate_ia_move(self):
+        from_pos, to = self.game.play_turn_ia_start()
+        
+        button1 = self.board_buttons[from_pos.x][from_pos.y]
+        self._select_square(button1)
+        
+        button2 = self.board_buttons[to.x][to.y]
+        self._select_square(button2)
+
+        self.update_ui()
+        time.sleep(1)
+
+        self.game.play_turn_ia_end()
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing

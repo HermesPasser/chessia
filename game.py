@@ -5,6 +5,7 @@ from board import Board
 from color import Color
 from pieces import King
 from enum import Enum
+import ai
 
 class MoveState(Enum):
     CAN_BE_PLACED = 0
@@ -186,4 +187,18 @@ class Game():
         else:
             pass # nothing
         
+    def play_turn_ia_start(self):
+        if self.game_ended:
+            return None
+        # since is confusing to de i.a do make
+        # the move w/o the board being updated
+        # the UI will call it instead of it
+        # being call on the play_turn()
         
+        ai_move = ai.calc_best_move(3, self, Color.BLACK)
+        self.move(ai_move[1])
+
+        return (ai_move[1].from_pos, ai_move[1].to_pos)
+
+    def play_turn_ia_end(self):
+        self.change_turn()
