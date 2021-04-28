@@ -140,25 +140,6 @@ class Game():
     
         return MoveState.CAN_NOT_BE_PLACED, None
 
-    def verify_for_check_mate(self, color) -> MoveState:
-        our_king_pos = self.board.get_piece_location(color, King)
-        our_king = self.board.get(our_king_pos.x, our_king_pos.y)
-
-        king_cant_move = False
-        pseudo_moves = our_king.get_pseudo_moves(our_king_pos)
-        for move in pseudo_moves:
-            if our_king.can_move(self.board, our_king_pos, move):
-                king_cant_move = True
-                break
-
-        if king_cant_move:
-            if self.board.in_check(color):
-                return MoveState.CHECK_MATE
-            
-            # return MoveState.DRAW_BY_STALEMATE
-
-        return None
-
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
             return None
@@ -167,26 +148,15 @@ class Game():
 
         if rs == MoveState.CAN_BE_PLACED:
             if mr.captured:
-                self._capture(mr.captured_position)
+                if isinstance(mr.captured, King):
+                    self.game_ended = True
+                    raise ChessException("You captured the enemy kind, you have won!")
 
             piece = self.board.get(from_pos.x, from_pos.y)
             mr.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
             self.move(mr)
             self.change_turn()
-
-            color = self._turn
-            rs = self.verify_for_check_mate(color)
-            if not rs:
-                color = color.reverse()
-                rs = self.verify_for_check_mate(color)
-
-            if rs == MoveState.CHECK_MATE:
-                self.game_ended = True
-                raise ChessException(f"CHECK-MATE\n{color} king can't defend himself")
-            # elif rs == MoveState.DRAW_BY_STALEMATE:
-            #     self.game_ended = True
-            #     raise ChessException(f"Draw by stalemate")
-
+           
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise ChessException("The selected piece can't be place on the selected spot")
         elif rs == MoveState.KING_IN_CHECK:
