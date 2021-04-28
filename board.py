@@ -15,7 +15,7 @@ class Board():
         # FIXME: i think is omitting something
         sio = StringIO()
         for _, y, p in self._iterate():
-            p = '□' if p is None else str(p)
+            p = '=' if p is None else str(p)
             sio.write(p)
             
             if y == Board.SIZE -1:
