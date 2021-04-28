@@ -3,6 +3,8 @@ from color import Color
 from move_result import MoveResult
 import math
 
+in_range = lambda x: x > -1 and x < 8
+
 # TODO: handle eating a pice on your way
 # when you move 2 squares or more (all pieces [pawn first 2-square move included] but king)   
 
@@ -20,6 +22,10 @@ class Piece():
 
     def __repr__(self):
         return self.to_unicode()
+
+    def get_pseudo_moves(self, current_pos) -> list:
+        """Returns all possible spots where you can place it without any validation"""
+        raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
     # TODO: this is dump, why it need to receive a start to
     # know if it can move? it make more sense to store its 
@@ -53,8 +59,7 @@ class King(Piece):
     def to_unicode(self):
         return '♔' if self.color == Color.WHITE else '♚'
 
-    def get_pseudo_moves(self, current_pos):
-        """Returns all possible spots where you can place it without checking for in check state or for pieces on the spot"""
+    def get_pseudo_moves(self, current_pos) -> list:
         moves = []
         moves.append(Position(current_pos.x, current_pos.y - 1))
         moves.append(Position(current_pos.x, current_pos.y + 1))
@@ -64,7 +69,6 @@ class King(Piece):
         moves.append(Position(current_pos.x - 1, current_pos.y))
         moves.append(Position(current_pos.x - 1, current_pos.y - 1))
         moves.append(Position(current_pos.x - 1, current_pos.y + 1))
-        in_range = lambda x: x > -1 and x < 8
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: implement castling and prevent the
@@ -110,6 +114,9 @@ class King(Piece):
 class Queen(Piece):
     def to_unicode(self):
         return '♕' if self.color == Color.WHITE else '♛'
+    
+    def get_pseudo_moves(self, current_pos) -> list:
+        return Rook(self.color).get_pseudo_moves(current_pos) + Bishop(self.color).get_pseudo_moves(current_pos)
 
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
@@ -143,6 +150,30 @@ class Queen(Piece):
 class Rook(Piece):
     def to_unicode(self):
         return '♖' if self.color == Color.WHITE else '♜'
+  
+    def get_pseudo_moves(self, current_pos) -> list:       
+        move_to_right = range(current_pos.y, 8)
+        move_to_left = range(0, current_pos.y + 1)
+        descend = range(current_pos.x, 8)
+        ascend = range(0, current_pos.x + 1)
+        
+        moves = []
+        def populate_vertical(increment_lambda):
+            for y in increment_lambda:
+                if not (y == current_pos.x and y == current_pos.y):
+                    moves.append(Position(current_pos.x, y))
+
+        def populate_horizontal(increment_lambda):
+            for x in increment_lambda:
+                if x != current_pos.x:
+                    moves.append(Position(x, current_pos.y))
+
+        populate_vertical(move_to_right)
+        populate_vertical(move_to_left)
+        populate_horizontal(ascend)
+        populate_horizontal(descend)
+
+        return moves
 
     # TODO: handle castling
     def can_move(self, board, start, end, no_checks=False):
@@ -182,6 +213,30 @@ class Bishop(Piece):
     def to_unicode(self):
         return '♗' if self.color == Color.WHITE else '♝'
 
+    def get_pseudo_moves(self, current_pos) -> list:
+        moves = []
+
+        increment_se = lambda x, y:(x+1, y+1)
+        increment_ms = lambda x, y:(x+1, y-1)
+        increment_nw = lambda x, y:(x-1, y-1)
+        increment_ne = lambda x, y:(x-1, y+1)
+
+        def populate(increment_lambda):
+            x = current_pos.x
+            y = current_pos.y
+
+            while x > -1 and x < 8 and y > -1 and y < 8:
+                if not (x == current_pos.x and y == current_pos.y):
+                    moves.append(Position(x, y))
+                x , y = increment_lambda(x, y)
+
+        populate(increment_se)
+        populate(increment_ms)
+        populate(increment_nw)
+        populate(increment_ne)
+
+        return moves
+
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
@@ -206,7 +261,19 @@ class Bishop(Piece):
 class Knight(Piece):
     def to_unicode(self):
         return '♘' if self.color == Color.WHITE else '♞'
-        
+
+    def get_pseudo_moves(self, current_pos) -> list:
+        moves = []
+        moves.append(Position(current_pos.x - 1, current_pos.y + 2))
+        moves.append(Position(current_pos.x - 1, current_pos.y - 2))
+        moves.append(Position(current_pos.x + 1, current_pos.y + 2))
+        moves.append(Position(current_pos.x + 1, current_pos.y - 2))
+        moves.append(Position(current_pos.x - 2, current_pos.y + 1))
+        moves.append(Position(current_pos.x - 2, current_pos.y - 1))
+        moves.append(Position(current_pos.x + 2, current_pos.y + 1))
+        moves.append(Position(current_pos.x + 2, current_pos.y - 1))
+        return [move for move in moves if in_range(move.x) and in_range(move.y)]
+
     def can_move(self, board, start, end, no_checks=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
@@ -224,6 +291,28 @@ class Knight(Piece):
 
 class Pawn(Piece):
     color_that_descends = Color.BLACK
+
+    def get_pseudo_moves(self, current_pos) -> list:
+        descend = self.direction_is_down()
+        moves = []
+
+        if descend:
+            # diagonal
+            moves.append(Position(current_pos.x + 1, current_pos.y - 1))
+            moves.append(Position(current_pos.x + 1, current_pos.y + 1))
+            
+            moves.append(Position(current_pos.x + 1, current_pos.y))
+            if self.is_first_move:
+                moves.append(Position(current_pos.x + 2, current_pos.y))
+        else:
+            moves.append(Position(current_pos.x - 1, current_pos.y - 1))
+            moves.append(Position(current_pos.x - 1, current_pos.y + 1))
+
+            moves.append(Position(current_pos.x - 1, current_pos.y))
+            if self.is_first_move:
+                moves.append(Position(current_pos.x - 2, current_pos.y))
+
+        return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     def to_unicode(self):
         return '♙' if self.color == Color.WHITE else '♟'
