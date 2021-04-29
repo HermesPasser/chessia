@@ -161,17 +161,24 @@ class Game():
     
         return MoveState.CAN_NOT_BE_PLACED, None
 
+    def _captured_king(self, mr : MoveResult):
+        """Throws the message of end game if a king was captured"""
+        if not mr.captured or not isinstance(mr.captured, King):
+            return
+
+        self.game_ended = True
+        player_message = "You captured the A.I's king , you have won!"
+        ai_message = "A.I have won!"
+        raise ChessException(player_message if self._turn == Color.WHITE else ai_message)
+
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
             return None
-            
+
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
-            if mr.captured:
-                if isinstance(mr.captured, King):
-                    self.game_ended = True
-                    raise ChessException("You captured the enemy kind, you have won!")
+            self._captured_king(mr)
 
             piece = self.board.get(from_pos.x, from_pos.y)
             mr.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
@@ -197,6 +204,7 @@ class Game():
         
         ai_move = ai.calc_best_move(3, self, Color.BLACK)
         self.move(ai_move[1])
+        self._captured_king(ai_move[1])
 
         return (ai_move[1].from_pos, ai_move[1].to_pos)
 

@@ -113,7 +113,11 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.handle_and_animate_ia_move()
 
     def handle_and_animate_ia_move(self):
-        from_pos, to = self.game.play_turn_ia_start()
+        message = False
+        try:
+            from_pos, to = self.game.play_turn_ia_start()
+        except ChessException as e:
+                message = str(e)
         
         button1 = self.board_buttons[from_pos.x][from_pos.y]
         self._select_square(button1)
@@ -125,6 +129,8 @@ class ChessBoardGUI(Qt.QMainWindow):
         time.sleep(1)
 
         self.game.play_turn_ia_end()
+        if message:
+            QtWidgets.QMessageBox.about(self, TITLE, message)
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
@@ -151,4 +157,3 @@ def make_window(game):
     w.setMinimumSize(600, 600)
     w.show()
     sys.exit(app.exec_())
-
