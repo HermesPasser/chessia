@@ -25,6 +25,7 @@ class Game():
         self.board = Board()
         self._turn = Color.WHITE
         self.game_ended = False
+        self.ai_difficulty = 3
         self.moves = []
 
     def get_current_turn(self):
@@ -185,11 +186,14 @@ class Game():
         # the UI will call it instead of it
         # being call on the play_turn()
         
-        ai_move = ai.calc_best_move(3, self, Color.BLACK)
-        self.move(ai_move[1])
-        self._captured_king(ai_move[1])
+        # TODO: we don't handle when the a.i don't have valid moves
 
-        return (ai_move[1].from_pos, ai_move[1].to_pos)
+        _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
+        self.move(ai_move)
+        self._captured_king(ai_move)
+        
+        print(ai_move)
+        return (ai_move.from_pos, ai_move.to_pos)
 
     def play_turn_ia_end(self):
         self.change_turn()

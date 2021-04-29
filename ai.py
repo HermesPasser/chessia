@@ -1,3 +1,4 @@
+from move_result import MoveResult
 import random
 import math
 # Base: byanofsky.com/2017/07/06/building-a-simple-chess-ai/
@@ -14,7 +15,7 @@ def evaluate_board(board, color):
 
     return value
 
-def calc_best_move(depth, game, player_color,alpha=-math.inf, beta=math.inf, is_maximizing_player=True):
+def calc_best_move(depth, game, player_color,alpha=-math.inf, beta=math.inf, is_maximizing_player=True) -> (int, MoveResult):
     if depth == 0:
         value = evaluate_board(game.board, player_color)
         return [value, None]
