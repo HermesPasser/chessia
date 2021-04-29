@@ -96,26 +96,10 @@ class Game():
             # but we __need__ to handle castling in the future. This hack shows how
             # many collateral effects this method (and the ones it calls) have
             return False 
-
-        if result.captured:
-            self._capture(result.captured_position)
-                
-        piece_is_first_move = self.board.get(from_pos.x, from_pos.y).is_first_move
-        self._move(from_pos, to_pos)
-
-        will_be_in_check = self.board.in_check(self.get_current_turn())
-
-        self._move(to_pos, from_pos)
-        self.board.get(from_pos.x, from_pos.y).is_first_move = piece_is_first_move
-
-        if result.captured:
-            self.board.set(result.captured_position.x, result.captured_position.y, result.captured)
         
-        # since we're currently calling it even when the move isn't successful 
-        # then we should keep track of any piece on the destination that may
-        # get overwrited (if the piece is the captured then we don't need)
-        elif to_pos != result.captured_position:
-            self.board.set(to_pos.x, to_pos.y, piece_on_destination)
+        self.move(result)
+        will_be_in_check = self.board.in_check(self.get_current_turn())
+        self.undo()
 
         return will_be_in_check
         
@@ -138,6 +122,7 @@ class Game():
         
         # check if the piece can be moved on the spot
         result = piece.can_move(self.board, from_pos, to_pos)
+        result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
         will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos)
         if result:
 
@@ -180,8 +165,6 @@ class Game():
         if rs == MoveState.CAN_BE_PLACED:
             self._captured_king(mr)
 
-            piece = self.board.get(from_pos.x, from_pos.y)
-            mr.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
             self.move(mr)
             self.change_turn()
            
