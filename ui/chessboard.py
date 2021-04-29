@@ -9,17 +9,20 @@ from board import Board
 from pieces import Piece
 from color import Color
 from ui.button import Button
- 
+from ui.worker import Worker
+
 TITLE = 'ChessIA'
 
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
-    
+    finished = Qt.pyqtSignal()
+
     def __init__(self, game):
         super(ChessBoardGUI, self).__init__()
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
+        self.ai_turn = False
         self._initialize_component()
   
     def resizeEvent(self, event):
@@ -65,6 +68,9 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.setWindowTitle(f"{TITLE} - {current_turn} turn")
 
     def _click(self, sender, position):
+        if self.ai_turn or self.game.game_ended:
+            return
+
         if self.start_move:
             self._stop_move_piece(position)
         else:
@@ -84,29 +90,11 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
-        else:
-            # if no error message is shown then the turn was played sucefully
-            self.handle_and_animate_ia_move()
-
-    def handle_and_animate_ia_move(self):
-        message = False
-        try:
-            from_pos, to = self.game.play_turn_ia_start()
-        except ChessException as e:
-                message = str(e)
+            return
         
-        button1 = self.board_buttons[from_pos.x][from_pos.y]
-        self._select_square(button1)
-        
-        button2 = self.board_buttons[to.x][to.y]
-        self._select_square(button2)
-
-        self.update_ui()
-        time.sleep(1)
-
-        self.game.play_turn_ia_end()
-        if message:
-            QtWidgets.QMessageBox.about(self, TITLE, message)
+        # since we can't say the turn ended just because not exception was thrown
+        if self.game.get_current_turn() == Color.BLACK:
+            self._call_worker()
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
@@ -117,6 +105,36 @@ class ChessBoardGUI(Qt.QMainWindow):
         if sender is not None:
             self.selected_spot_pos = position
             self._select_square(sender)
+
+    def _call_worker(self):
+        self.ai_turn = True
+
+        self.thread = Qt.QThread()
+        self.worker = Worker(self.game)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self._worker_progressed)
+        self.worker.finished.connect(lambda: self._worker_finished())
+        self.thread.start()
+
+    def _worker_progressed(self, from_pos, to_pos, message):
+        if not message:
+            btn = self.board_buttons[from_pos.x][from_pos.y]
+            btn2 = self.board_buttons[to_pos.x][to_pos.y]
+            self._select_square(btn)
+            self._select_square(btn2)
+        
+        self.update_ui()
+        if message:
+            QtWidgets.QMessageBox.about(self, TITLE, message)
+
+    def _worker_finished(self):
+        self.game.play_turn_ia_end()
+        self.ai_turn = False
+        self.update_ui()
 
     def _select_square(self, button):
         button.set_foreground('green')
