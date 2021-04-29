@@ -8,34 +8,10 @@ from game import Game, ChessException
 from board import Board
 from pieces import Piece
 from color import Color
-
+from ui.button import Button
+ 
 TITLE = 'ChessIA'
 
-class Button(Qt.QPushButton):
-    def __init__(self, text, parent=None):
-        super(Button, self).__init__(text, parent)
-        self._bg_color = 'white'
-        self._fg_color = 'black'
-
-        font = Qt.QFont("Times", 25, Qt.QFont.Bold)
-        self.setFont(font)
-        self.setText(text)
-        self.set_size(75, 75)
-
-    def set_size(self, width, height):
-        self.setMinimumSize(Qt.QSize(width, height))
-
-    def set_background(self, color):
-        self._bg_color = color
-        self._update_style()
-
-    def set_foreground(self, color):
-        self._fg_color = color
-        self._update_style()
-
-    def _update_style(self):
-        self.setStyleSheet(f"background-color: {self._bg_color}; color: {self._fg_color}")
-        
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
     
@@ -149,11 +125,3 @@ class ChessBoardGUI(Qt.QMainWindow):
         for rows in self.board_buttons:
             for b in rows:
                 b.set_size(self.width() / 8, self.height() / 8)
-
-
-def make_window(game):
-    app = Qt.QApplication(sys.argv)
-    w = ChessBoardGUI(game)
-    w.setMinimumSize(600, 600)
-    w.show()
-    sys.exit(app.exec_())
