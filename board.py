@@ -2,12 +2,15 @@ from utils import make_2d_array
 from color import Color
 from pieces import *
 from io import StringIO
+from pdb import set_trace
 
 class Board():
     SIZE = 8
 
     def __init__(self, pre_populate=True):
         self._board = make_2d_array(range(Board.SIZE), None)
+        self._white_king_loc = None
+        self._black_king_loc = None
         if pre_populate:
             self._make_board()
 
@@ -26,14 +29,17 @@ class Board():
 
     def get(self, x: int, y: int):
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
+            print(x, y)
             raise Exception("Index out of bound")
 
         return self._board[x][y]
 
     def set(self, x: int, y: int, piece : Piece):
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
+            print(x, y)
             raise Exception("Index out of bound")
 
+        print(f"setting {x}x{y} to {piece}, will override {self.get(x, y)}")
         self._board[x][y] = piece
 
     def get_piece_location(self, color : Color, type_piece : type) -> Position:
@@ -41,36 +47,61 @@ class Board():
             if type(p) is type_piece and p.color == color:
                 return Position(x, y)
 
+        print("board::deu ruim -> No color type_piece found", color, type_piece)
+        print("board::stored positions:", self._black_king_loc, self._white_king_loc)
+        print(self)
         raise Exception(f"No {color} {type_piece.__name__} found")
 
+    def update_king_loc(self):
+        """Since this class is not thread/recursion safe, lets store its position"""
+        self._white_king_loc = self.get_piece_location(Color.WHITE, King)
+        self._black_king_loc = self.get_piece_location(Color.BLACK, King)
+
     def in_check(self, color):
-        return self.is_square_in_check(color, self.get_piece_location(color, King))
+        result = None
+        try:
+            loc = self._white_king_loc if color == Color.WHITE else self._black_king_loc
+            if self.get(loc.x, loc.y) is None:
+                # for some reason, the king os not there anymore, so we try to locate and print the board
+                print("board::king not located")
+                print(loc, self.get(loc.x, loc.y))
+                print(self)
+                # exit(0)
+                # print(self)
+                # loc = self.get_piece_location(color, King)
+            result = self.is_square_in_check(color, loc)
+        except Exception as e:
+            print("?")
+            raise e
+        
+        return result
 
     # TODO: do we really need to let it here? Game and King
     # make sense having it but it deals with the internals 
     # of the board.
     def is_square_in_check(self, color, pos_to_check : Position):
+        # return False
         is_empty_spot = self.is_empty_spot(pos_to_check.x, pos_to_check.y)
-        other_player_color = Color.BLACK if color == Color.WHITE else Color.WHITE
+        other_player_color = color.reverse()
        
         in_check = False
-        for x, y, piece in self._iterate():
-            if piece is not None and piece.color == other_player_color:                 
-                clear_spot = False
+        for piece, position in self.iterate_material(other_player_color):
+            clear_spot = False
 
-                # Remember: the pawn eats diagonally and moves vertically
-                if isinstance(piece, Pawn) and is_empty_spot:
-                    clear_spot = True
-                    self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
+            # Remember: the pawn eats diagonally and moves vertically
+            if isinstance(piece, Pawn) and is_empty_spot:
+                clear_spot = True
                 
-                if piece.can_move(self, Position(x, y), pos_to_check, no_checks=True):
-                    in_check = True
+                self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
+            
+            if piece.can_move(self, position, pos_to_check, no_checks=True):
+                in_check = True
 
-                if clear_spot:
-                    self.set(pos_to_check.x, pos_to_check.y, None)
-                
-                if in_check:
-                    break
+            if clear_spot:
+                self.set(pos_to_check.x, pos_to_check.y, None)
+            
+            if in_check:
+                break
         
         return in_check
 

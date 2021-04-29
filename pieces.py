@@ -109,7 +109,7 @@ class King(Piece):
     # TODO: implement castling and prevent the
     def can_move(self, board, start, end, no_checks=False):
         # target_piece = board.get(end.x, end.y)
-        
+        # return MoveResult(False)
         if self.has_same_color(board, end):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
             return MoveResult(False)
@@ -130,8 +130,11 @@ class King(Piece):
         distance = lambda p1, p2: abs(math.sqrt((p2.y - p1.y) * (p2.y - p1.y) + (p2.x - p1.x) * (p2.x - p1.x)))
 
         # it must have at least, one square of distance between each king
-        other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
-        other_king_pos = board.get_piece_location(other_color, King)
+        other_color = self.color.reverse()
+        
+        #other_king_pos = board.get_piece_location(other_color, King)
+        other_king_pos = board._black_king_loc if board._black_king_loc == self else board._white_king_loc
+        
         other_king_too_close = distance(end, other_king_pos) < 2
         
         captured_piece = None
