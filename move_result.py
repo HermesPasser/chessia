@@ -1,3 +1,4 @@
+from io import StringIO
 
 class MoveResult:
     def __init__(self, succeed : bool, captured=None):
@@ -22,4 +23,18 @@ class MoveResult:
     def __repr__(self):
         captured = f", capured: {self.captured}" if self.captured is not None else ''
         return f"MoveResult({self.succeed}{captured})"
+
+    def __str__(self):
+        io = StringIO()
+        io.write(f"[{type(self).__name__}:")
+        io.write(f"{self.piece} ")
+        io.write('moved' if self.succeed else 'failed to move from')
+        io.write(f" {self.from_pos} -> {self.to_pos}")
+        if self.captured:
+            io.write(f", and {self.captured} capured on {self.captured_position}")
+        io.write(f"]")
+        val = io.getvalue()
+        io.close()
+        return val
+
                 
