@@ -41,6 +41,12 @@ class Board():
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
             raise Exception("Index out of bound")
 
+        if isinstance(piece, King):
+            if piece.color == Color.WHITE:
+                self.white_king_loc = Position(x, y)
+            else:
+                self.black_king_loc = Position(x, y)
+        
         self._board[x][y] = piece
 
     def move(self, from_pos : Position, to_pos : Position): 
