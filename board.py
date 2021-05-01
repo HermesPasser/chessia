@@ -8,8 +8,15 @@ class Board():
 
     def __init__(self, pre_populate=True):
         self._board = make_2d_array(range(Board.SIZE), None)
+        self.white_king_loc = None
+        self.black_king_loc = None
         if pre_populate:
             self._make_board()
+            self.white_king_loc = self.get_piece_location(Color.WHITE, King)
+            self.black_king_loc = self.get_piece_location(Color.BLACK, King)
+
+    def get_king_loc_by_color(self, color : Color) -> Piece:
+        return self.black_king_loc if color == Color.BLACK else self.white_king_loc
 
     def __repr__(self):
         # FIXME: i think is omitting something
@@ -36,7 +43,29 @@ class Board():
 
         self._board[x][y] = piece
 
+    def move(self, from_pos : Position, to_pos : Position): 
+        print(from_pos, to_pos)
+        prev = self._board[from_pos.x][from_pos.y]
+        
+        if isinstance(self._board[to_pos.x][to_pos.y], King):
+            raise Exception("Can't override the king")
+
+        self._board[to_pos.x][to_pos.y] = prev
+        self._board[from_pos.x][from_pos.y] = None
+
+        if isinstance(prev, King):
+            if prev.color == Color.WHITE:
+                self.white_king_loc = from_pos
+            else:
+                self.black_king_loc = from_pos
+
     def get_piece_location(self, color : Color, type_piece : type) -> Position:
+        if type(type_piece) is King:
+            if self.white_king_loc and color == Color.WHITE:
+                return self.white_king_loc
+            elif self.black_king_loc:
+                return self.black_king_loc
+                
         for x, y, p in self._iterate():
             if type(p) is type_piece and p.color == color:
                 return Position(x, y)
@@ -44,7 +73,7 @@ class Board():
         raise Exception(f"No {color} {type_piece.__name__} found")
 
     def in_check(self, color):
-        return self.is_square_in_check(color, self.get_piece_location(color, King))
+        return self.is_square_in_check(color, self.get_king_loc_by_color(color))
 
     # TODO: do we really need to let it here? Game and King
     # make sense having it but it deals with the internals 

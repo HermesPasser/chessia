@@ -130,7 +130,7 @@ class King(Piece):
 
         # it must have at least, one square of distance between each king
         other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
-        other_king_pos = board.get_piece_location(other_color, King)
+        other_king_pos = board.get_king_loc_by_color(other_color)
         other_king_too_close = distance(end, other_king_pos) < 2
         
         captured_piece = None

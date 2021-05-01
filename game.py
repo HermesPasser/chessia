@@ -40,18 +40,13 @@ class Game():
     def _capture(self, position : Position):
         self.board.set(position.x, position.y, None)
 
-    def _move(self, from_pos : Position, to_pos : Position):        
-        prev = self.board._board[from_pos.x][from_pos.y]
-        prev.is_first_move = False
-        self.board._board[to_pos.x][to_pos.y] = prev
-        self.board._board[from_pos.x][from_pos.y] = None
-
     def move(self, move : MoveResult):
         if move.captured:
             self._capture(move.captured_position)
 
-        self._move(move.from_pos, move.to_pos)
-        
+        self.board.move(move.from_pos, move.to_pos)
+        move.piece.is_first_move = False
+
         self.moves.append(move)
 
     def get_moves(self, color) -> MoveResult:
@@ -81,7 +76,8 @@ class Game():
         
         move = self.moves.pop()
 
-        self._move(move.to_pos, move.from_pos)
+        self.board.move(move.to_pos, move.from_pos)
+        
         self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
         if move.captured:
             self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
