@@ -80,7 +80,7 @@ class Board():
     # of the board.
     def is_square_in_check(self, color, pos_to_check : Position):
         is_empty_spot = self.is_empty_spot(pos_to_check.x, pos_to_check.y)
-        other_player_color = Color.BLACK if color == Color.WHITE else Color.WHITE
+        other_player_color = color.reverse()
        
         in_check = False
         for x, y, piece in self._iterate():

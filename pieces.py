@@ -129,7 +129,7 @@ class King(Piece):
         distance = lambda p1, p2: abs(math.sqrt((p2.y - p1.y) * (p2.y - p1.y) + (p2.x - p1.x) * (p2.x - p1.x)))
 
         # it must have at least, one square of distance between each king
-        other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
+        other_color = self.color.reverse()
         other_king_pos = board.get_king_loc_by_color(other_color)
         other_king_too_close = distance(end, other_king_pos) < 2
         
