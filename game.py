@@ -57,14 +57,8 @@ class Game():
 
             # from the pseudo moves, get the ones that can be made
             for pseudo in pseudo_moves:
-                # let's not waste time with unecessary checks
-                land_on_check = False
-                if isinstance(p, King):
-                    land_on_check = self.board.is_square_in_check(self._turn, pseudo)
-                result = p.can_move(self.board, pos, pseudo, land_on_check)
-                result.set_moved_piece(p, pos, pseudo, p.is_first_move)
-
-                if  result:
+                rs, result = self._check_move_state(pos, pseudo)
+                if rs == MoveState.CAN_BE_PLACED and result:
                     moves.append(result)
         
         return moves
@@ -120,11 +114,15 @@ class Game():
         if piece.color != self.get_current_turn():
             return MoveState.NOT_YOUR_PIECE, None
         
-        # check if the piece can be moved on the spot
-        land_under_attack = self.board.is_square_in_check(self._turn, to_pos)
+        
+        land_under_attack = False
+        if isinstance(piece, King):
+            land_under_attack = self.board.is_square_in_check(self._turn, to_pos)
+        
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
         result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
         will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos)
+        # check if the piece can be moved on the spot
         if result:
 
             # prevent you from moving any piece that is not the king when it is in check
