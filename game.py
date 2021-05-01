@@ -85,22 +85,25 @@ class Game():
         self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
         if move.captured:
             self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
-
         
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
-        
         piece_on_destination = self.board.get(to_pos.x, to_pos.y)
-        if piece_on_destination and piece_on_destination.color != self._turn:
-            # it throws no (current color) king exception, so let's just prevent it
-            # we could just prevent from clicking in the same color in the main method
-            # but we __need__ to handle castling in the future. This hack shows how
-            # many collateral effects this method (and the ones it calls) have
-            return False 
+
+        if piece_on_destination:
+            if piece_on_destination.color == self._turn or isinstance(piece_on_destination, King):
+                return False 
         
         self.move(result)
         will_be_in_check = self.board.in_check(self.get_current_turn())
         self.undo()
+
+        # since the operation is not atomic if resultmove is false
+        # and this is going to be called even then is false because
+        # of the flawed way i handle the current/next turn check
+        # verifying code
+        if not result and piece_on_destination:
+            self.board.set(to_pos.x, to_pos.y, piece_on_destination)
 
         return will_be_in_check
         
