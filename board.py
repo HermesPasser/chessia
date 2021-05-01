@@ -50,7 +50,6 @@ class Board():
         self._board[x][y] = piece
 
     def move(self, from_pos : Position, to_pos : Position): 
-        print(from_pos, to_pos)
         prev = self._board[from_pos.x][from_pos.y]
         
         if isinstance(self._board[to_pos.x][to_pos.y], King):
