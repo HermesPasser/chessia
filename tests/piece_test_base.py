@@ -34,7 +34,8 @@ class PieceTestBase(unittest.TestCase):
         piece_pos = self.board.get_piece_location(color, piece_kind)
         piece = self.board.get(piece_pos.x, piece_pos.y)
         piece.is_first_move = first_move
-        return piece.can_move(self.board, piece_pos, target_pos)
+        land_under_attack = self.board.is_square_in_check(color, target_pos)
+        return piece.can_move(self.board, piece_pos, target_pos, land_under_attack)
  
     def assertCanMoveToNonEmptySpot(self, our_piece_kind : Piece, our_color : Color, other_piece_kind : Piece, other_color : Color, layout : str):
         """ """
@@ -53,5 +54,6 @@ class PieceTestBase(unittest.TestCase):
         our_piece = self.board.get(our_piece_pos.x, our_piece_pos.y)
         
         other_piece_pos = self.board.get_piece_location(other_color, other_piece_kind)
-        return our_piece.can_move(self.board, our_piece_pos, other_piece_pos)
+        land_under_attack = self.board.is_square_in_check(our_color, other_piece_pos)
+        return our_piece.can_move(self.board, our_piece_pos, other_piece_pos, land_under_attack)
 

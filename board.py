@@ -63,7 +63,7 @@ class Board():
                     clear_spot = True
                     self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
                 
-                if piece.can_move(self, Position(x, y), pos_to_check, no_checks=True):
+                if piece.can_move(self, Position(x, y), pos_to_check):
                     in_check = True
 
                 if clear_spot:

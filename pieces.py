@@ -34,12 +34,10 @@ class Piece():
     # TODO: this is dump, why it need to receive a start to
     # know if it can move? it make more sense to store its 
     # location
-    def can_move(self, board, start : Position, end : Position, no_checks=False) -> bool:
+    def can_move(self, board, start : Position, end : Position, land_under_attack=False) -> bool:
         """Returns true if the piece can move from 'start' to 'end'\n
         
-        no_checks: exclusive for the king, if true it would not check if the 'end'
-        position is being attacked, since the attacked logic can call this method
-        from the king, this flag prevents it from going to a infinete loop."""
+        land_under_attack: if true, the position were the piece is tryingto move is under attack"""
         raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
     def to_unicode(self):
@@ -107,7 +105,7 @@ class King(Piece):
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: implement castling and prevent the
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         # target_piece = board.get(end.x, end.y)
         
         if self.has_same_color(board, end):
@@ -115,7 +113,8 @@ class King(Piece):
             return MoveResult(False)
         
         # the a enemy piece can reach, the king can't go
-        if not no_checks and board.is_square_in_check(self.color, end):
+        # if not no_checks and board.is_square_in_check(self.color, end):
+        if land_under_attack:
             return MoveResult(False)
 
         piece = board.get(end.x, end.y)
@@ -156,7 +155,7 @@ class Queen(Piece):
     def get_pseudo_moves(self, current_pos) -> list:
         return Rook(self.color).get_pseudo_moves(current_pos) + Bishop(self.color).get_pseudo_moves(current_pos)
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
         
@@ -211,7 +210,7 @@ class Rook(Piece):
         return moves
 
     # TODO: handle castling
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         # target_piece = board.get(end.x, end.y)
         if self.has_same_color(board, end):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
@@ -267,7 +266,7 @@ class Bishop(Piece):
 
         return moves
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
 
@@ -303,7 +302,7 @@ class Knight(Piece):
         moves.append(Position(current_pos.x + 2, current_pos.y - 1))
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
 
@@ -354,7 +353,7 @@ class Pawn(Piece):
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: handle pomotion and el passant
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
         
