@@ -88,7 +88,7 @@ class Board():
         other_player_color = color.reverse()
        
         in_check = False
-        for x, y, piece in self._iterate():
+        for piece, pos in self.iterate_material(color):
             if piece is not None and piece.color == other_player_color:                 
                 clear_spot = False
 
@@ -97,7 +97,7 @@ class Board():
                     clear_spot = True
                     self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
                 
-                if piece.can_move(self, Position(x, y), pos_to_check):
+                if piece.can_move(self, pos, pos_to_check):
                     in_check = True
 
                 if clear_spot:
