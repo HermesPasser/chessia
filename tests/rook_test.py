@@ -65,7 +65,7 @@ class RookTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_vertically_ally_piece_in_the_way(self):
+    def test_can_not_move_vertically_piece_in_the_way(self):
         self.assertCanNotMoveToEmptySpot(Rook, Color.WHITE, \
             '========' +\
             '========' +\
@@ -73,6 +73,16 @@ class RookTest(PieceTestBase):
             '===r====' +\
             '========' +\
             '===p====' +\
+            '===0====' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Rook, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===r====' +\
+            '========' +\
+            '===P====' +\
             '===0====' +\
             '========')
 
@@ -86,7 +96,27 @@ class RookTest(PieceTestBase):
             '========' +\
             '========')
 
-    def test_can_not_move_horizontally_ally_piece_in_the_way(self):
+        self.assertCanNotMoveToEmptySpot(Rook, Color.BLACK, \
+            '========' +\
+            '===0====' +\
+            '===p====' +\
+            '===R====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+    def test_can_not_move_horizontally_piece_in_the_way(self):
+        self.assertCanNotMoveToEmptySpot(Rook, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===Rp0==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
         self.assertCanNotMoveToEmptySpot(Rook, Color.BLACK, \
             '========' +\
             '========' +\
@@ -102,6 +132,16 @@ class RookTest(PieceTestBase):
             '========' +\
             '========' +\
             '0p=r====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+        self.assertCanNotMoveToEmptySpot(Rook, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '0P=r====' +\
             '========' +\
             '========' +\
             '========' +\

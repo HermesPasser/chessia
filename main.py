@@ -1,4 +1,4 @@
-from gui import make_window
+from ui import make_window
 from game import Game
 
 game = Game()

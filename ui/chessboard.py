@@ -1,4 +1,5 @@
 import sys
+import time
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
 from position import Position
@@ -7,43 +8,21 @@ from game import Game, ChessException
 from board import Board
 from pieces import Piece
 from color import Color
+from ui.button import Button
+from ui.worker import Worker
 
-TITLE = 'ChessIA'
+TITLE = 'Poor man\'s chessAI'
 
-class Button(Qt.QPushButton):
-    def __init__(self, text, parent=None):
-        super(Button, self).__init__(text, parent)
-        self._bg_color = 'white'
-        self._fg_color = 'black'
-
-        font = Qt.QFont("Times", 25, Qt.QFont.Bold)
-        self.setFont(font)
-        self.setText(text)
-        self.set_size(75, 75)
-
-    def set_size(self, width, height):
-        self.setMinimumSize(Qt.QSize(width, height))
-
-    def set_background(self, color):
-        self._bg_color = color
-        self._update_style()
-
-    def set_foreground(self, color):
-        self._fg_color = color
-        self._update_style()
-
-    def _update_style(self):
-        self.setStyleSheet(f"background-color: {self._bg_color}; color: {self._fg_color}")
-
-        
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
-    
+    finished = Qt.pyqtSignal()
+
     def __init__(self, game):
         super(ChessBoardGUI, self).__init__()
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
+        self.ai_turn = False
         self._initialize_component()
   
     def resizeEvent(self, event):
@@ -89,6 +68,9 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.setWindowTitle(f"{TITLE} - {current_turn} turn")
 
     def _click(self, sender, position):
+        if self.ai_turn or self.game.game_ended:
+            return
+
         if self.start_move:
             self._stop_move_piece(position)
         else:
@@ -108,6 +90,7 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+<<<<<<< HEAD:gui.py
         else:
             # if no error message is shown then the turn was played sucefully
             self.handle_and_animate_ia_move()
@@ -125,6 +108,13 @@ class ChessBoardGUI(Qt.QMainWindow):
         time.sleep(1)
 
         self.game.play_turn_ia_end()
+=======
+            return
+        
+        # since we can't say the turn ended just because not exception was thrown
+        if self.game.get_current_turn() == Color.BLACK:
+            self._call_worker()
+>>>>>>> dev:ui/chessboard.py
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
@@ -136,6 +126,36 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.selected_spot_pos = position
             self._select_square(sender)
 
+    def _call_worker(self):
+        self.ai_turn = True
+
+        self.thread = Qt.QThread()
+        self.worker = Worker(self.game)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self._worker_progressed)
+        self.worker.finished.connect(lambda: self._worker_finished())
+        self.thread.start()
+
+    def _worker_progressed(self, from_pos, to_pos, message):
+        if not message:
+            btn = self.board_buttons[from_pos.x][from_pos.y]
+            btn2 = self.board_buttons[to_pos.x][to_pos.y]
+            self._select_square(btn)
+            self._select_square(btn2)
+        
+        self.update_ui()
+        if message:
+            QtWidgets.QMessageBox.about(self, TITLE, message)
+
+    def _worker_finished(self):
+        self.game.play_turn_ia_end()
+        self.ai_turn = False
+        self.update_ui()
+
     def _select_square(self, button):
         button.set_foreground('green')
   
@@ -143,11 +163,3 @@ class ChessBoardGUI(Qt.QMainWindow):
         for rows in self.board_buttons:
             for b in rows:
                 b.set_size(self.width() / 8, self.height() / 8)
-
-
-def make_window(game):
-    app = Qt.QApplication(sys.argv)
-    w = ChessBoardGUI(game)
-    w.setMinimumSize(600, 600)
-    w.show()
-    sys.exit(app.exec_())

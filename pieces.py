@@ -34,12 +34,10 @@ class Piece():
     # TODO: this is dump, why it need to receive a start to
     # know if it can move? it make more sense to store its 
     # location
-    def can_move(self, board, start : Position, end : Position, no_checks=False) -> bool:
+    def can_move(self, board, start : Position, end : Position, land_under_attack=False) -> bool:
         """Returns true if the piece can move from 'start' to 'end'\n
         
-        no_checks: exclusive for the king, if true it would not check if the 'end'
-        position is being attacked, since the attacked logic can call this method
-        from the king, this flag prevents it from going to a infinete loop."""
+        land_under_attack: if true, the position were the piece is tryingto move is under attack"""
         raise NotImplementedError(f"Not implemented for '{type(self)}'")
 
     def to_unicode(self):
@@ -57,6 +55,34 @@ class Piece():
         """Checks if the piece on 'position' is not from the same color of this instance"""
         piece = board.get(position.x, position.y)
         return piece is not None and piece.color != self.color
+
+    def handle_jump_over_pieces(self, board, end : Position, squares : list) -> MoveResult:
+        """Given a list of spots/squares (Piece, Position) it returns a result move if is no piece was jumped over
+        It assumes if is not empty, then the first the piece who called the method.
+        """
+        if squares:
+            squares.pop(0) # pop self
+
+        jumped_over_pieces = len(squares) > 1
+        if jumped_over_pieces:
+            return MoveResult(False)  
+        
+        captured_piece = None
+        if len(squares) == 1:
+            landed_spot = Position(squares[0][1], squares[0][2]) 
+            landed_piece = squares[0][0]
+            
+            jumped_over_a_piece = landed_spot != end
+            if jumped_over_a_piece:
+                return MoveResult(False)
+            
+            landed_on_friend = landed_piece.color == self.color
+            if landed_on_friend:
+                return MoveResult(False)
+            
+            captured_piece = (landed_piece, landed_spot)
+             
+        return MoveResult(True, captured_piece)  
             
 
 class King(Piece):
@@ -79,7 +105,7 @@ class King(Piece):
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: implement castling and prevent the
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         # target_piece = board.get(end.x, end.y)
         
         if self.has_same_color(board, end):
@@ -87,7 +113,8 @@ class King(Piece):
             return MoveResult(False)
         
         # the a enemy piece can reach, the king can't go
-        if not no_checks and board.is_square_in_check(self.color, end):
+        # if not no_checks and board.is_square_in_check(self.color, end):
+        if land_under_attack:
             return MoveResult(False)
 
         piece = board.get(end.x, end.y)
@@ -103,7 +130,7 @@ class King(Piece):
 
         # it must have at least, one square of distance between each king
         other_color = Color.WHITE if self.color == Color.BLACK else Color.BLACK
-        other_king_pos = board.get_piece_location(other_color, King)
+        other_king_pos = board.get_king_loc_by_color(other_color)
         other_king_too_close = distance(end, other_king_pos) < 2
         
         captured_piece = None
@@ -128,7 +155,7 @@ class Queen(Piece):
     def get_pseudo_moves(self, current_pos) -> list:
         return Rook(self.color).get_pseudo_moves(current_pos) + Bishop(self.color).get_pseudo_moves(current_pos)
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
         
@@ -143,18 +170,12 @@ class Queen(Piece):
             squares = board.get_pieces_range_horizontal(start, end)
         else:
             squares = board.get_pieces_range_vertical(start, end)
-   
-        if squares:
-            squares.pop(0) # pop self
 
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = (can_move_vertical or can_move_diagonal) and not pieces_in_the_way
-        
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
-        
-        return MoveResult(valid_move, captured_piece)
+        valid_move = (can_move_vertical or can_move_diagonal)
+        if not valid_move:
+            return MoveResult(False)
+
+        return self.handle_jump_over_pieces(board, end, squares)
 
 
 class Rook(Piece):
@@ -189,7 +210,7 @@ class Rook(Piece):
         return moves
 
     # TODO: handle castling
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         # target_piece = board.get(end.x, end.y)
         if self.has_same_color(board, end):
             # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
@@ -207,19 +228,11 @@ class Rook(Piece):
         else:
             squares = board.get_pieces_range_vertical(start, end)
 
-        if squares:
-            squares.pop(0) # remove itself
+        valid_move = (can_move_x or can_move_y)
+        if not valid_move:
+            return MoveResult(False)
 
-        # check if there is only one piece (aside from itself) in the way and that the piece is from the other player
-        # 2 since one is self
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = (can_move_x or can_move_y) and not pieces_in_the_way
-
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
-
-        return MoveResult(valid_move, captured_piece)
+        return self.handle_jump_over_pieces(board, end, squares)  
 
 
 class Bishop(Piece):  
@@ -253,7 +266,7 @@ class Bishop(Piece):
 
         return moves
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
 
@@ -262,16 +275,12 @@ class Bishop(Piece):
         can_move_diagonal = abs_x != 0 and abs_y != 0 and abs_x == abs_y
 
         squares = board.get_pieces_range_diagonal(start.x, start.y, end.x, end.y)
-        if squares:
-            squares.pop(0) # remove itself
-        pieces_in_the_way = len(squares) > 1 or (len(squares) > 0 and squares[0][0].color == self.color)
-        valid_move = can_move_diagonal and not pieces_in_the_way
 
-        captured_piece = None
-        if valid_move and len(squares) == 1:
-            captured_piece = (squares[0][0], Position(squares[0][1], squares[0][2]))
+        valid_move = can_move_diagonal
+        if not valid_move:
+            return MoveResult(False)
 
-        return MoveResult(valid_move, captured_piece)
+        return self.handle_jump_over_pieces(board, end, squares)
 
 
 class Knight(Piece):
@@ -293,7 +302,7 @@ class Knight(Piece):
         moves.append(Position(current_pos.x + 2, current_pos.y - 1))
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
 
@@ -344,7 +353,7 @@ class Pawn(Piece):
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: handle pomotion and el passant
-    def can_move(self, board, start, end, no_checks=False):
+    def can_move(self, board, start, end, land_under_attack=False):
         if self.has_same_color(board, end):
             return MoveResult(False)
         
