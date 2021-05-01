@@ -18,5 +18,6 @@ class Worker(Qt.QObject):
         except ChessException as e:
             message = str(e)
         
-        self.progress.emit(from_pos, to, message)
+        if from_pos and to:
+            self.progress.emit(from_pos, to, message)
         self.finished.emit()

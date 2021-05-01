@@ -88,8 +88,8 @@ class Board():
         other_player_color = color.reverse()
        
         in_check = False
-        for piece, pos in self.iterate_material(color):
-            if piece is not None and piece.color == other_player_color:                 
+        for piece, pos in self.iterate_material(other_player_color):
+            if piece is not None:
                 clear_spot = False
 
                 # Remember: the pawn eats diagonally and moves vertically
