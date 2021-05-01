@@ -11,7 +11,7 @@ from color import Color
 from ui.button import Button
 from ui.worker import Worker
 
-TITLE = 'ChessIA'
+TITLE = 'Poor man\'s chessAI'
 
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
