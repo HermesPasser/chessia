@@ -61,9 +61,9 @@ class Board():
 
         if isinstance(prev, King):
             if prev.color == Color.WHITE:
-                self.white_king_loc = from_pos
+                self.white_king_loc = to_pos
             else:
-                self.black_king_loc = from_pos
+                self.black_king_loc = to_pos
 
     def get_piece_location(self, color : Color, type_piece : type) -> Position:
         if type(type_piece) is King:
