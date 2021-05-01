@@ -189,11 +189,16 @@ class Game():
         # TODO: we don't handle when the a.i don't have valid moves
 
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
-        self.move(ai_move)
-        self._captured_king(ai_move)
+        if ai_move:
+            self.move(ai_move)
+            self._captured_king(ai_move)
         
-        print(ai_move)
-        return (ai_move.from_pos, ai_move.to_pos)
+            print("ai::", ai_move)
+            return (ai_move.from_pos, ai_move.to_pos)
+
+        print("ai:: no more moves to do")
+        self.game_ended = True
+        raise ChessException("A.I's king was stalemated, tecnically is a draw but since the\nis the Poor Man's ChessAI then you have won!")
 
     def play_turn_ia_end(self):
         self.change_turn()

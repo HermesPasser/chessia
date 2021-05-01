@@ -57,4 +57,9 @@ def calc_best_move(depth, game, player_color,alpha=-math.inf, beta=math.inf, is_
 
         if beta <= alpha:
             break
-    return [best_move_value, best_move or possible_moves[0]]
+
+    possible_move = None
+    if len(possible_moves) > 0:
+        possible_moves[0]
+    
+    return [best_move_value, best_move or possible_move]
