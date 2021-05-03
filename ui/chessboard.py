@@ -29,6 +29,17 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.resized.emit()
         super().resizeEvent(event)
 
+    def keyPressEvent(self, event):
+        key = event.key()
+ 
+        if key == QtCore.Qt.Key_Q and self.game.get_current_turn() != Color.WHITE:
+            self.game.game_ended = False
+            self.game.undo()
+            self.game.undo()
+            self.update_ui()
+        elif key == QtCore.Qt.Key_W:
+            print(self.game.board)
+    
     def _initialize_component(self):
         self.resized.connect(self._on_resize)
 
