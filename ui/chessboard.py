@@ -5,9 +5,6 @@ from PyQt5 import Qt, QtCore, QtWidgets
 from utils import make_2d_array
 from engine.position import Position
 from engine.game import Game, ChessException
-from engine.board import Board
-from engine.pieces import Piece
-from engine.color import Color
 from ui.button import Button
 from ui.worker import Worker
 
@@ -32,7 +29,7 @@ class ChessBoardGUI(Qt.QMainWindow):
     def keyPressEvent(self, event):
         key = event.key()
  
-        if key == QtCore.Qt.Key_Q and self.game.get_current_turn() != Color.WHITE:
+        if key == QtCore.Qt.Key_Q and self.game.get_current_turn().is_black():
             self.game.game_ended = False
             self.game.undo()
             self.game.undo()
@@ -72,10 +69,10 @@ class ChessBoardGUI(Qt.QMainWindow):
                 btn = self.board_buttons[r][c]
                 btn.setText(str(piece) if piece else '')
 
-                fg = '#c9c9c9' if piece and piece.color == Color.WHITE else '#404040'
+                fg = '#c9c9c9' if piece and piece.color.is_white() else '#404040'
                 btn.set_foreground(fg)
 
-        current_turn = 'white' if self.game.get_current_turn() == Color.WHITE else 'black'
+        current_turn =  str(self.game.get_current_turn())
         self.setWindowTitle(f"{TITLE} - {current_turn} turn")
 
     def _click(self, sender, position):
@@ -104,7 +101,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             return
         
         # since we can't say the turn ended just because not exception was thrown
-        if self.game.get_current_turn() == Color.BLACK:
+        if self.game.get_current_turn().is_black():
             self._call_worker()
 
     def _start_move_piece(self, sender, position):
