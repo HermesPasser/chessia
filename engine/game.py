@@ -32,7 +32,7 @@ class Game():
         return self._turn
 
     def change_turn(self):  
-       self._turn = Color.WHITE if self._turn == Color.BLACK else Color.BLACK
+       self._turn = self._turn.reverse()
 
     def is_empty_spot(self, position : Position) -> bool:
         return self.board.is_empty_spot(position.x, position.y)
@@ -153,7 +153,7 @@ class Game():
         self.game_ended = True
         player_message = "You captured the A.I's king , you have won!"
         ai_message = "A.I have won!"
-        raise ChessException(player_message if self._turn == Color.WHITE else ai_message)
+        raise ChessException(player_message if self._turn.is_white() else ai_message)
 
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
