@@ -37,7 +37,17 @@ class GameTests(unittest.TestCase):
         self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.x, rook_pos.y + 1), MoveState.CAN_BE_PLACED)
    
     def test_check_move_state_returns_not_your_piece(self):
-        self.assertTrue(False)
+        load_board(self.game.board, \
+            '===K====' +
+            '===P====' +
+            '===B====' +
+            '========' +
+            '========' +
+            '===r====' +
+            '========' +
+            '===k====')
+        bishop_pos = self.game.board.get_piece_location(Color.BLACK, Bishop)
+        self.assertMoveState(Color.WHITE, bishop_pos, Position(bishop_pos.x, bishop_pos.y + 1), MoveState.NOT_YOUR_PIECE)
 
     def test_check_move_state_returns_no_piece_to_move(self):
         self.assertTrue(False)
