@@ -1,6 +1,6 @@
 from engine.pieces import Bishop, King, Knight, Pawn, Queen, Rook
 from engine.color import Color
-from tests.piece_test_base import PieceTestBase
+from tests.pieces.piece_test_base import PieceTestBase
 
 class KingTest(PieceTestBase):
     def test_can_move(self):

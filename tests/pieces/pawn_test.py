@@ -1,6 +1,6 @@
 from engine.pieces import Pawn, Queen
 from engine.color import Color
-from tests.piece_test_base import PieceTestBase
+from tests.pieces.piece_test_base import PieceTestBase
 
 # TODO: test invalid move when pawn try to go backwards
 # TODO: test the same stuff for black Pawn

@@ -1,6 +1,6 @@
 from engine.pieces import Queen, Pawn, Bishop
 from engine.color import Color
-from tests.piece_test_base import PieceTestBase
+from tests.pieces.piece_test_base import PieceTestBase
 
 class QueenTest(PieceTestBase):
     def test_can_move_diagonally(self):
