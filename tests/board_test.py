@@ -1,4 +1,5 @@
-from engine.pieces import *
+from engine.position import Position
+from engine.pieces import Piece
 from engine.color import Color
 from engine.board import Board
 from utils import load_board, make_spots, piece_from_char
