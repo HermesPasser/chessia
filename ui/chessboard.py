@@ -2,12 +2,12 @@ import sys
 import time
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
-from position import Position
 from utils import make_2d_array
-from game import Game, ChessException
-from board import Board
-from pieces import Piece
-from color import Color
+from engine.position import Position
+from engine.game import Game, ChessException
+from engine.board import Board
+from engine.pieces import Piece
+from engine.color import Color
 from ui.button import Button
 from ui.worker import Worker
 

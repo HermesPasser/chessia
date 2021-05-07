@@ -1,6 +1,6 @@
-from pieces import Piece
-from color import Color
-from board import Board
+from engine.pieces import Piece
+from engine.color import Color
+from engine.board import Board
 from utils import load_board
 import unittest
 

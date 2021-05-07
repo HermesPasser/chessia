@@ -1,6 +1,6 @@
-from position import Position
-from color import Color
-from move_result import MoveResult
+from engine.position import Position
+from engine.color import Color
+from engine.move_result import MoveResult
 import math
 
 in_range = lambda x: x > -1 and x < 8

@@ -1,6 +1,6 @@
 from utils import make_2d_array
-from color import Color
-from pieces import *
+from engine.color import Color
+from engine.pieces import *
 from io import StringIO
 
 class Board():

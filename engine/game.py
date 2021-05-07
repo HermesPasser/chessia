@@ -1,11 +1,11 @@
-from move_result import MoveResult
+from engine.move_result import MoveResult
+from engine.position import Position
+from engine.board import Board
+from engine.color import Color
+from engine.pieces import King
 from utils import make_2d_array
-from position import Position
-from board import Board
-from color import Color
-from pieces import King
 from enum import Enum
-import ai
+import engine.ai as ai
 
 class MoveState(Enum):
     CAN_BE_PLACED = 0

@@ -1,5 +1,5 @@
-from pieces import Knight, King, Pawn
-from color import Color
+from engine.pieces import Knight, King, Pawn
+from engine.color import Color
 from tests import valid_moves
 from tests.piece_test_base import PieceTestBase
 

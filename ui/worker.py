@@ -1,4 +1,4 @@
-from game import ChessException
+from engine.game import ChessException
 from PyQt5 import Qt
 
 class Worker(Qt.QObject):

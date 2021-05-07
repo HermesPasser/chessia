@@ -1,5 +1,5 @@
-from pieces import Rook, Pawn, Bishop
-from color import Color
+from engine.pieces import Rook, Pawn, Bishop
+from engine.color import Color
 from tests.piece_test_base import PieceTestBase
 
 class BishopTest(PieceTestBase):

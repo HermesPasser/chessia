@@ -1,5 +1,5 @@
-from pieces import Bishop, King, Knight, Pawn, Queen, Rook
-from color import Color
+from engine.pieces import Bishop, King, Knight, Pawn, Queen, Rook
+from engine.color import Color
 from tests.piece_test_base import PieceTestBase
 
 class KingTest(PieceTestBase):

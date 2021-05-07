@@ -1,6 +1,6 @@
-from pieces import *
-from color import Color
-from board import Board
+from engine.pieces import *
+from engine.color import Color
+from engine.board import Board
 from utils import load_board, make_spots, piece_from_char
 from tests import valid_moves
 import unittest
