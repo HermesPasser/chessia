@@ -14,9 +14,20 @@ class GameTests(unittest.TestCase):
         self.game._turn = turn       
         result, _ = self.game._check_move_state(start, end)
         self.assertEqual(result, state, f"Expecting {state}, given {result}")
-    
+
     def test_check_move_state_returns_can_be_placed(self):
-        self.assertTrue(False)
+        load_board(self.game.board, \
+            '===K====' +
+            '===P====' +
+            '===B====' +
+            '========' + # in front-right of bishop: 3x4
+            '========' +
+            '===r====' +
+            '===p====' +
+            '===k====')
+
+        bishop_pos = self.game.board.get_piece_location(Color.BLACK, Bishop)
+        self.assertMoveState(Color.BLACK, bishop_pos, Position(3, 4), MoveState.CAN_BE_PLACED)
     
     def test_check_move_state_returns_can_not_be_placed_if_leave_king_unprotected(self):
         # TODO: should this kind of move really lead to a CAN_NOT_BE_PLACED?
@@ -50,25 +61,50 @@ class GameTests(unittest.TestCase):
         self.assertMoveState(Color.WHITE, bishop_pos, Position(bishop_pos.x, bishop_pos.y + 1), MoveState.NOT_YOUR_PIECE)
 
     def test_check_move_state_returns_no_piece_to_move(self):
-        self.assertTrue(False)
+        load_board(self.game.board, \
+            '===K====' +
+            '===P====' +
+            '===B====' +
+            '========' +
+            '========' +
+            '===r====' +
+            '===p====' +
+            '===k====')
+
+        self.assertMoveState(Color.BLACK, Position(0,0), Position(0, 1), MoveState.NO_PIECE_TO_MOVE)
 
     def test_check_move_state_returns_king_in_check(self):
-        self.assertTrue(False)
+        """ we can't eat the white bishop with the black rook since the white rook is attacking the black king """
+        load_board(self.game.board, \
+            '===K====' +
+            '========' +
+            '===r====' +
+            '========' +
+            '===R====' +
+            '========' +
+            '===b====' +
+            '===k====')
+
+        rook_pos = self.game.board.get_piece_location(Color.BLACK, Rook)
+        target_pos = self.game.board.get_piece_location(Color.WHITE, Bishop)
+        self.assertMoveState(Color.BLACK, rook_pos, target_pos, MoveState.KING_IN_CHECK)
 
     def test_check_move_state_returns_king_will_be_in_check(self):
-        self.assertTrue(False)
+        # this layout can test _move_will_leave_in_check_state too
+        load_board(self.game.board, \
+            '===K====' +
+            '===P====' +
+            '========' +
+            'Q=======' +
+            '========' +
+            '========' +
+            '===r====' +
+            '====k===')
+
+        rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
+        self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.x, rook_pos.y - 1), MoveState.KING_WILL_BE_IN_CHECK)
 
 """
-test the _check_move_state and _move_will_leave_in_check_state in the case
-'===K====' +
-'===P====' +
-'========' +
-'Q=======' +
-'========' +
-'========' +
-'===b====' +
-'====k==='
-
 i think it should say the king is in check
 '===K====' +
 '===P====' +
