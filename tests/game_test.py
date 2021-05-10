@@ -15,6 +15,86 @@ class GameTests(unittest.TestCase):
         result, _ = self.game._check_move_state(start, end)
         self.assertEqual(result, state, f"Expecting {state}, given {result}")
 
+    def test_checkmate(self):
+        load_board(self.game.board, \
+            '===K====' +
+            '========' +
+            '========' +
+            '========' +
+            'R=======' +
+            '========' +
+            '=p======' +
+            'k===R===') # mate
+        
+        self.game._turn = Color.WHITE
+        self.assertTrue(self.game._checkmated())
+
+        load_board(self.game.board, \
+            '===K====' +
+            '========' +
+            '========' +
+            '========' +
+            'R=======' +
+            '========' +
+            '========' +
+            'k===R===') # not mate
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._checkmated())
+        
+        load_board(self.game.board, \
+            '===K====' +
+            '========' +
+            '========' +
+            '========' +
+            'R===q===' +
+            '========' +
+            '=p======' +
+            'kp==R===') # not mate, queen can kil the attacker
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._checkmated())
+
+        load_board(self.game.board, \
+            '========' +
+            '==r=r===' +
+            'q=======' +
+            '===K====' +
+            'q===b===' +
+            '========' +
+            '========' +
+            '====k===')
+        
+        self.game._turn = Color.BLACK
+        self.assertTrue(self.game._checkmated())
+        
+        load_board(self.game.board, \
+            'RNB=KBNR' +
+            'PPPP=PPP' +
+            '====P===' +
+            '========' +
+            '======pQ' +
+            '=====p==' +
+            'ppppp==p' +
+            'rnbqkbnr') #  fool's mate
+        
+        self.game._turn = Color.WHITE
+        self.assertTrue(self.game._checkmated())
+        
+        load_board(self.game.board, \
+            'RNBQKBNR' +
+            'PPP=PPPP' +
+            '===P====' +
+            '========' +
+            'q=======' +
+            '==p=====' +
+            'pp=ppppp' +
+            'rnb=kbnr') # is not fool's mate since can be blocked
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._checkmated())
+          
+
     def test_check_move_state_returns_can_be_placed(self):
         load_board(self.game.board, \
             '===K====' +
@@ -121,16 +201,6 @@ stalemate (draw)
 'q=======' +
 '===K====' +
 'q=======' +
-'========' +
-'========' +
-'====k==='
-
-checkmate
-'========' +
-'==r=r===' +
-'q=======' +
-'===K====' +
-'q===b===' +
 '========' +
 '========' +
 '====k==='

@@ -14,8 +14,7 @@ class MoveState(Enum):
     NOT_YOUR_PIECE = 3
     KING_IN_CHECK = 4
     KING_WILL_BE_IN_CHECK = 5
-    CHECK_MATE = 6
-    DRAW_BY_STALEMATE = 7
+    DRAW_BY_STALEMATE = 6
 
 class ChessException(Exception):
     pass
@@ -96,7 +95,24 @@ class Game():
             self.board.set(to_pos.x, to_pos.y, piece_on_destination)
 
         return will_be_in_check
-    
+
+    def _checkmated(self):
+        checkmate = True
+        legal_moves = self.get_moves(self._turn)
+
+        for move in legal_moves:
+            self.move(move)
+
+            if not self.board.in_check(self._turn):
+                checkmate = False
+            
+            self.undo()
+
+            if not checkmate:
+                break
+        
+        return checkmate
+
     def _check_move_state(self, from_pos : Position, to_pos : Position, turn=None) -> (MoveState, MoveResult):
         """Return an enum corresponding to the state of the move and the move itself if it can be done."""
         # TODO: make the checks and delegate the important parts to Move and Piece
@@ -147,15 +163,10 @@ class Game():
     
         return MoveState.CAN_NOT_BE_PLACED, None
 
-    def _captured_king(self, mr : MoveResult):
-        """Throws the message of end game if a king was captured"""
-        if not mr.captured or not isinstance(mr.captured, King):
-            return
-
-        self.game_ended = True
-        player_message = "You captured the A.I's king , you have won!"
-        ai_message = "A.I have won!"
-        raise ChessException(player_message if self._turn.is_white() else ai_message)
+    def _check_end_game(self):
+        if self._checkmated():
+            self._end_game = True
+            raise ChessException(f"CHECKMATE\n{self._turn.reverse()} have won!")
 
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
@@ -164,11 +175,10 @@ class Game():
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
-            self._captured_king(mr)
-
             self.move(mr)
             self.change_turn()
            
+            self._check_end_game()
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise ChessException("The selected piece can't be place on the selected spot")
         elif rs == MoveState.KING_IN_CHECK:
@@ -191,7 +201,6 @@ class Game():
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
         if ai_move:
             self.move(ai_move)
-            self._captured_king(ai_move)
         
             print("ai::", ai_move)
             return (ai_move.from_pos, ai_move.to_pos)
@@ -202,3 +211,4 @@ class Game():
 
     def play_turn_ia_end(self):
         self.change_turn()
+        self._check_end_game()
