@@ -57,7 +57,7 @@ class Game():
 
             # from the pseudo moves, get the ones that can be made
             for pseudo in pseudo_moves:
-                rs, result = self._check_move_state(pos, pseudo)
+                rs, result = self._check_move_state(pos, pseudo, color)
                 if rs == MoveState.CAN_BE_PLACED and result:
                     moves.append(result)
         
@@ -96,14 +96,16 @@ class Game():
             self.board.set(to_pos.x, to_pos.y, piece_on_destination)
 
         return will_be_in_check
-        
-    def _check_move_state(self, from_pos : Position, to_pos : Position) -> (MoveState, MoveResult):
+    
+    def _check_move_state(self, from_pos : Position, to_pos : Position, turn=None) -> (MoveState, MoveResult):
         """Return an enum corresponding to the state of the move and the move itself if it can be done."""
         # TODO: make the checks and delegate the important parts to Move and Piece
-
+        if not turn:
+            turn = self._turn
+        
         piece = self.board.get(from_pos.x, from_pos.y)
-        selected_piece_is_our_king = type(piece) is King and piece.color == self.get_current_turn()
-        is_in_check = self.board.in_check(self.get_current_turn())
+        selected_piece_is_our_king = type(piece) is King and piece.color == turn
+        is_in_check = self.board.in_check(turn)
         
         # the position has no piece so return w/o switching the turn
         # or you didn't move
@@ -111,13 +113,13 @@ class Game():
             return MoveState.NO_PIECE_TO_MOVE, None
 
         # the clicked piece is from the other player
-        if piece.color != self.get_current_turn():
+        if piece.color != turn:
             return MoveState.NOT_YOUR_PIECE, None
         
         
         land_under_attack = False
         if isinstance(piece, King):
-            land_under_attack = self.board.is_square_in_check(self._turn, to_pos)
+            land_under_attack = self.board.is_square_in_check(turn, to_pos)
         
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
         result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
