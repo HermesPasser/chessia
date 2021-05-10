@@ -20,6 +20,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.start_move = False
         self.selected_spot_pos = None
         self.ai_turn = False
+        self.no_ai = False
         self._initialize_component()
   
     def resizeEvent(self, event):
@@ -36,6 +37,13 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.update_ui()
         elif key == QtCore.Qt.Key_W:
             print(self.game.board)
+        elif key == QtCore.Qt.Key_R:
+            self.no_ai = not self.no_ai # turn a.i off
+            print('a.i on:', self.no_ai)
+        elif key == QtCore.Qt.Key_D:
+            self.game.change_turn()
+            self.update_ui()
+            print('turn changed to', self.game.get_current_turn())
     
     def _initialize_component(self):
         self.resized.connect(self._on_resize)
@@ -101,7 +109,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             return
         
         # since we can't say the turn ended just because not exception was thrown
-        if self.game.get_current_turn().is_black():
+        if not self.no_ai and self.game.get_current_turn().is_black():
             self._call_worker()
 
     def _start_move_piece(self, sender, position):
