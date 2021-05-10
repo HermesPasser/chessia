@@ -143,7 +143,7 @@ class Game():
         # the default message displayed when the move is invalid piece-wise, then we check 
         # it here too
         if will_be_in_check and selected_piece_is_our_king:
-                return MoveState.KING_WILL_BE_IN_CHECK, None
+            return MoveState.KING_WILL_BE_IN_CHECK, None
     
         return MoveState.CAN_NOT_BE_PLACED, None
 
