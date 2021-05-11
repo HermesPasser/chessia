@@ -97,7 +97,7 @@ class Game():
         return will_be_in_check
 
     def _checkmated(self):
-        checkmate = True
+        checkmate = self.board.in_check(self._turn)
         legal_moves = self.get_moves(self._turn)
 
         for move in legal_moves:
@@ -165,7 +165,7 @@ class Game():
 
     def _check_end_game(self):
         if self._checkmated():
-            self._end_game = True
+            self.game_ended = True
             raise ChessException(f"CHECKMATE\n{self._turn.reverse()} have won!")
 
     def play_turn (self, from_pos : Position, to_pos : Position):

@@ -93,6 +93,19 @@ class GameTests(unittest.TestCase):
         
         self.game._turn = Color.WHITE
         self.assertFalse(self.game._checkmated())
+
+        load_board(self.game.board,\
+            '=======K' +
+            '=====k==' +
+            '======q=' +
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '========') # is not mate since the king is not in check
+        
+        self.game._turn = Color.BLACK
+        self.assertFalse(self.game._checkmated())
           
 
     def test_check_move_state_returns_can_be_placed(self):
