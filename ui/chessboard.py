@@ -39,7 +39,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             print(self.game.board)
         elif key == QtCore.Qt.Key_R:
             self.no_ai = not self.no_ai # turn a.i off
-            print('a.i on:', self.no_ai)
+            print('a.i off:', self.no_ai)
         elif key == QtCore.Qt.Key_D:
             self.game.change_turn()
             self.update_ui()
