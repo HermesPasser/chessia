@@ -107,6 +107,103 @@ class GameTests(unittest.TestCase):
         self.game._turn = Color.BLACK
         self.assertFalse(self.game._checkmated())
           
+    def test_stalemate(self):
+        load_board(self.game.board,\
+            '=======K' +
+            '=====k==' +
+            '======q=' +
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '========')
+        
+        self.game._turn = Color.BLACK
+        self.assertTrue(self.game._stalemated())
+        
+        # is only stalemate if is the turn of the king w/o moves
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._stalemated())
+
+        load_board(self.game.board,\
+            '=====K==' +
+            '=====b==' +
+            '=====k==' +
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '========')
+        
+        self.game._turn = Color.BLACK
+        self.assertTrue(self.game._stalemated())
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._stalemated())
+        
+        load_board(self.game.board,\
+            'KB=====r' +
+            '========' +
+            '=k======' +
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '========')
+        
+        self.game._turn = Color.BLACK
+        self.assertTrue(self.game._stalemated())
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._stalemated())
+        
+        load_board(self.game.board,\
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '========' +
+            '==K=====' +
+            '=R======' +
+            'k=======')
+        
+        self.game._turn = Color.WHITE
+        self.assertTrue(self.game._stalemated())
+        
+        self.game._turn = Color.BLACK
+        self.assertFalse(self.game._stalemated())
+        
+        load_board(self.game.board,\
+            '========' +
+            '========' +
+            '=k======' +
+            '========' +
+            '========' +
+            '=q======' +
+            'P=======' +
+            'K=======')
+        
+        self.game._turn = Color.BLACK
+        self.assertTrue(self.game._stalemated())
+        
+        self.game._turn = Color.WHITE
+        self.assertFalse(self.game._stalemated())
+
+        load_board(self.game.board,\
+            'k=======' +
+            'P=======' +
+            'K=======' +
+            '========' +
+            '=====B==' +
+            '========' +
+            '========' +
+            '========')
+        
+        self.game._turn = Color.WHITE
+        self.assertTrue(self.game._stalemated())
+        
+        self.game._turn = Color.BLACK
+        self.assertFalse(self.game._stalemated())
 
     def test_check_move_state_returns_can_be_placed(self):
         load_board(self.game.board, \

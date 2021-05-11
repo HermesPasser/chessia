@@ -113,6 +113,11 @@ class Game():
         
         return checkmate
 
+    def _stalemated(self):
+        if len(self.get_moves(self._turn)) == 0 and not self.board.in_check(self._turn):
+            return True
+        return False
+
     def _check_move_state(self, from_pos : Position, to_pos : Position, turn=None) -> (MoveState, MoveResult):
         """Return an enum corresponding to the state of the move and the move itself if it can be done."""
         # TODO: make the checks and delegate the important parts to Move and Piece
@@ -167,6 +172,9 @@ class Game():
         if self._checkmated():
             self.game_ended = True
             raise ChessException(f"CHECKMATE\n{self._turn.reverse()} have won!")
+        elif self._stalemated():
+            self.game_ended = True
+            raise ChessException(f"Draw by STALEMATE")
 
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended:
@@ -204,10 +212,6 @@ class Game():
         
             print("ai::", ai_move)
             return (ai_move.from_pos, ai_move.to_pos)
-
-        print("ai:: no more moves to do")
-        self.game_ended = True
-        raise ChessException("A.I's king was stalemated, tecnically is a draw but since the\nis the Poor Man's ChessAI then you have won!")
 
     def play_turn_ia_end(self):
         self.change_turn()
