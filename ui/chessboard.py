@@ -19,7 +19,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
-        self.ai_turn = False
+        self.ai_playing = False 
         self.no_ai = False
         self._initialize_component()
   
@@ -30,7 +30,7 @@ class ChessBoardGUI(Qt.QMainWindow):
     def keyPressEvent(self, event):
         key = event.key()
  
-        if key == QtCore.Qt.Key_Q and self.game.get_current_turn().is_black():
+        if key == QtCore.Qt.Key_Q and not self.ai_playing:
             self.game.game_ended = False
             self.game.undo()
             self.game.undo()
@@ -84,7 +84,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.setWindowTitle(f"{TITLE} - {current_turn} turn")
 
     def _click(self, sender, position):
-        if self.ai_turn or self.game.game_ended:
+        if self.ai_playing or self.game.game_ended:
             return
 
         if self.start_move:
@@ -110,6 +110,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         
         # since we can't say the turn ended just because not exception was thrown
         if not self.no_ai and self.game.get_current_turn().is_black():
+            self.ai_playing = True
             self._call_worker()
 
     def _start_move_piece(self, sender, position):
@@ -123,8 +124,6 @@ class ChessBoardGUI(Qt.QMainWindow):
             self._select_square(sender)
 
     def _call_worker(self):
-        self.ai_turn = True
-
         self.thread = Qt.QThread()
         self.worker = Worker(self.game)
         self.worker.moveToThread(self.thread)
@@ -149,7 +148,7 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _worker_finished(self):
         self.game.play_turn_ia_end()
-        self.ai_turn = False
+        self.ai_playing = False
         self.update_ui()
 
     def _select_square(self, button):
