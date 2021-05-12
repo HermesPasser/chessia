@@ -2,7 +2,7 @@ from engine.move_result import MoveResult
 from engine.position import Position
 from engine.board import Board
 from engine.color import Color
-from engine.pieces import King
+from engine.pieces import King, Pawn
 from utils import make_2d_array
 from enum import Enum
 import engine.ai as ai
@@ -124,6 +124,11 @@ class Game():
         if not turn:
             turn = self._turn
         
+        # hack to reset the state since we can't leave it True
+        for piece, _ in self.board.iterate_material(turn):
+            if isinstance(piece, Pawn):
+                piece.did_moved_twice = False
+
         piece = self.board.get(from_pos.x, from_pos.y)
         selected_piece_is_our_king = type(piece) is King and piece.color == turn
         is_in_check = self.board.in_check(turn)

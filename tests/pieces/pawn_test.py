@@ -157,6 +157,156 @@ class PawnTest(PieceTestBase):
             '========' +\
             '========')
 
+    def test_can_move_white_en_passant_right(self):
+        self.assertCanMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===pP===' +\
+            '========' +\
+            '========' +\
+            '========', True)
+
+        self.assertCanMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===pP===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========', True)
+
+    def test_can_move_white_en_passant_right(self):
+        self.assertCanMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '==0=====' +\
+            '==Pp====' +\
+            '========' +\
+            '========' +\
+            '========', True)
+
+    def test_can_move_black_en_passant_left(self):
+        self.assertCanMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '===pP===' +\
+            '===0====' +\
+            '========' +\
+            '========', True)
+
+    def test_can_move_black_en_passant_right(self):
+        self.assertCanMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '==Pp====' +\
+            '===0====' +\
+            '========' +\
+            '========', True)
+    
+    def test_can_not_move_white_en_passant_not_on_the_mid_spots(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '====0===' +\
+            '===pP===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========', True)
+
+    def test_can_not_move_black_en_passant_not_on_the_mid_spots(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '==Pp====' +\
+            '===0====', True)
+        
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '===pP===' +\
+            '===0====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========', True) 
+
+    def test_can_not_move_white_en_passant_enemy_did_not_moved_twice(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===pP===' +\
+            '========' +\
+            '========' +\
+            '========', False)
+        
+    def test_can_not_move_black_en_passant_enemy_did_not_moved_twice(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '===pP===' +\
+            '===0====' +\
+            '========' +\
+            '========', False)
+
+    def test_can_not_move_white_en_passant_right_enemy_is_not_a_pawn(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Queen, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===0====' +\
+            '===Qp===' +\
+            '========' +\
+            '========' +\
+            '========', True)
+        
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.WHITE, Queen, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '====0===' +\
+            '===pQ===' +\
+            '========' +\
+            '========' +\
+            '========', True)
+
+    def test_can_not_move_black_en_passant_right_enemy_is_not_a_pawn(self):
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Queen, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '==Pq====' +\
+            '===0====' +\
+            '========' +\
+            '========', True)
+        
+        self.assertCanNotMoveToEmptySpotEnPassant(Pawn, Color.BLACK, Queen, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '====qP==' +\
+            '====0===' +\
+            '========' +\
+            '========', True)
+
     def test_can_move_black_once(self):
         self.assertCanMoveToEmptySpot(Pawn, Color.BLACK, \
             '========' +\
