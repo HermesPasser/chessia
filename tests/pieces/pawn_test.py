@@ -179,6 +179,28 @@ class PawnTest(PieceTestBase):
             '========' +\
             '========')
 
+    def test_can_move_black_once_piece_on_spot(self):
+        self.assertCanNotMoveToNonEmptySpot(Pawn, Color.BLACK, Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===P====' +\
+            '===p====' +\
+            '========' +\
+            '========' +\
+            '========')
+
+    def test_can_move_white_once_piece_on_spot(self):
+        self.assertCanNotMoveToNonEmptySpot(Pawn, Color.WHITE, Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===P====' +\
+            '===p====' +\
+            '========' +\
+            '========' +\
+            '========')
+
     def test_can_not_move_black_once_backwards(self):
         self.assertCanNotMoveToEmptySpot(Pawn, Color.BLACK, \
             '========' +\
