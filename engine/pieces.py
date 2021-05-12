@@ -1,6 +1,6 @@
 from engine.position import Position
 from engine.color import Color
-from engine.move_result import MoveResult
+from engine.move_result import MoveResult, CastlingMoveResult
 import math
 
 in_range = lambda x: x > -1 and x < 8
@@ -86,6 +86,7 @@ class Piece():
             
 
 class King(Piece):
+
     def to_unicode(self):
         return '♔' if self.color == Color.WHITE else '♚'
 
@@ -102,22 +103,38 @@ class King(Piece):
         moves.append(Position(current_pos.x - 1, current_pos.y))
         moves.append(Position(current_pos.x - 1, current_pos.y - 1))
         moves.append(Position(current_pos.x - 1, current_pos.y + 1))
+
+        # castling
+        if self.is_first_move:
+            moves.append(Position(current_pos.x, 0))
+            moves.append(Position(current_pos.x, 7))
         return [move for move in moves if in_range(move.x) and in_range(move.y)]
 
     # TODO: implement castling and prevent the
     def can_move(self, board, start, end, land_under_attack=False):
-        # target_piece = board.get(end.x, end.y)
-        
-        if self.has_same_color(board, end):
-            # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
-            return MoveResult(False)
-        
-        # the a enemy piece can reach, the king can't go
-        # if not no_checks and board.is_square_in_check(self.color, end):
+        # where a enemy piece can reach, the king don't
         if land_under_attack:
             return MoveResult(False)
-
+        
         piece = board.get(end.x, end.y)
+
+        if self.has_same_color(board, end):
+            # no need to check distance/position since there's no way this can be performed
+            # wrongly given only those conditions (unless we're testing on non default layout)
+            no_pieces_in_the_way = len(board.get_pieces_range_horizontal(start, end)) == 2
+            is_valid_castling = isinstance(piece, Rook) and self.is_first_move and piece.is_first_move and no_pieces_in_the_way
+            
+            result = CastlingMoveResult()
+            result.set_moved_piece(None, start, end, None)
+            
+            if is_valid_castling:
+                safe_path = not board.is_square_in_check(self.color, result.rook_final_pos)
+                safe_landing = not board.is_square_in_check(self.color, result.king_final_pos)
+                result.succeed = safe_path and safe_landing
+                return result
+
+            return MoveResult(False)
+        
         king_on_target = isinstance(piece, King) and piece.color != self.color
 
         abs_x = abs(start.x - end.x)
@@ -209,11 +226,8 @@ class Rook(Piece):
 
         return moves
 
-    # TODO: handle castling
     def can_move(self, board, start, end, land_under_attack=False):
-        # target_piece = board.get(end.x, end.y)
         if self.has_same_color(board, end):
-            # or target_piece is type(Rook): # cause if is a rook, then it should be allowed to select your piece
             return MoveResult(False)
         
         abs_x = abs(start.x - end.x)

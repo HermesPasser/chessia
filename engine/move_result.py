@@ -1,6 +1,18 @@
 from io import StringIO
+from engine.position import Position
 
-class MoveResult:
+class MoveResultBase:
+    
+    def __bool__(self):
+        return self.succeed
+    
+    __nonzero__ = __bool__
+
+    def __eq__(self, other):
+        return bool(self) == other
+
+
+class MoveResult(MoveResultBase):
     def __init__(self, succeed : bool, captured=None):
         """captured: (Piece, Position), optional"""
         self.succeed = succeed
@@ -15,14 +27,6 @@ class MoveResult:
         self.from_pos = from_pos
         self.to_pos = to_pos
         self.was_first_move = was_first_move
-
-    def __bool__(self):
-        return self.succeed
-    
-    __nonzero__ = __bool__
-
-    def __eq__(self, other):
-        return bool(self) == other
 
     def __repr__(self):
         captured = f", capured: {self.captured}" if self.captured is not None else ''
@@ -41,4 +45,19 @@ class MoveResult:
         io.close()
         return val
 
-                
+class CastlingMoveResult(MoveResultBase):
+    def __init__(self):
+        self.succeed = True
+        self.king_final_pos = None
+        self.king_pos = None
+    
+    def set_moved_piece(self, piece, from_pos, to_pos, was_first_move):
+        self.king_pos = from_pos
+        self.rook_pos = to_pos
+
+        if self.king_pos.y - self.rook_pos.y == 4: # long castling
+            self.king_final_pos = Position(self.king_pos.x, self.king_pos.y - 2)
+            self.rook_final_pos = Position(self.king_pos.x, self.king_pos.y - 1)
+        else:
+            self.king_final_pos = Position(self.king_pos.x, self.king_pos.y + 2)
+            self.rook_final_pos = Position(self.king_pos.x, self.king_pos.y + 1)
