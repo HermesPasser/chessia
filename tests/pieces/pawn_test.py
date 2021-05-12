@@ -2,10 +2,6 @@ from engine.pieces import Pawn, Queen
 from engine.color import Color
 from tests.pieces.piece_test_base import PieceTestBase
 
-# TODO: test invalid move when pawn try to go backwards
-# TODO: test the same stuff for black Pawn
-# TODO: figure out a way to get rid of the duplicate code
-# TODO: test pawn try to move where there is a piece
 class PawnTest(PieceTestBase):
     def test_can_move_black_diagonal_left(self):
         self.assertCanMoveToNonEmptySpot(Pawn, Color.BLACK, Queen, Color.WHITE, \
@@ -36,6 +32,28 @@ class PawnTest(PieceTestBase):
             '==q=====' +\
             '===P====' +\
             '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+    def test_can_not_move_black_diagonal_no_pice_on_landing_spot(self):
+        self.assertCanNotMoveToEmptySpot(Pawn, Color.WHITE, \
+            '========' +\
+            '========' +\
+            '==0=====' +\
+            '===p====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+
+    def test_can_not_move_white_diagonal_no_pice_on_landing_spot(self):
+        self.assertCanNotMoveToEmptySpot(Pawn, Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '===P====' +\
+            '====0===' +\
             '========' +\
             '========' +\
             '========')
