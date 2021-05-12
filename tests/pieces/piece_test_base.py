@@ -13,6 +13,33 @@ class PieceTestBase(unittest.TestCase):
         self.board.set(pos.x, pos.y, None)
         return pos
 
+    def assertCanMoveToEmptySpotEnPassant(self, piece_kind : Piece, color : Color, enemy_kind : Piece, enemy_color : Color, layout : str, enemy_did_moved_twice=True):
+        """Test the en passant move by checking if a piece was captured on the sides of the pawn and by allowing to set if the piece moved twice
+        """
+        rs = self._canPieceMoveToEmptySpotEnPassant(piece_kind, color, enemy_kind, enemy_color, layout, enemy_did_moved_twice)
+        self.assertTrue(rs)
+    
+    def assertCanNotMoveToEmptySpotEnPassant(self, piece_kind : Piece, color : Color, enemy_kind : Piece, enemy_color : Color, layout : str, enemy_did_moved_twice=True):
+        """Test the en passant move by checking if a piece was captured on the sides of the pawn and by allowing to set if the piece moved twice
+        """
+        rs = self._canPieceMoveToEmptySpotEnPassant(piece_kind, color, enemy_kind, enemy_color, layout, enemy_did_moved_twice)
+        self.assertFalse(rs)
+     
+    def _canPieceMoveToEmptySpotEnPassant(self, piece_kind : Piece, color : Color, enemy_kind : Piece, enemy_color : Color, layout : str, enemy_did_moved_twice) -> bool:
+        load_board(self.board, layout)
+        target_pos = self.get_targed_and_clean_spot()
+        
+        piece_pos = self.board.get_piece_location(color, piece_kind)
+        piece = self.board.get(piece_pos.x, piece_pos.y)
+
+        captured_pos = self.board.get_piece_location(enemy_color, enemy_kind)
+        captured = self.board.get(captured_pos.x, captured_pos.y)
+        captured.did_moved_twice = enemy_did_moved_twice
+
+        land_under_attack = self.board.is_square_in_check(color, target_pos)
+        rs = piece.can_move(self.board, piece_pos, target_pos, land_under_attack)
+        return rs and rs.captured_position == captured_pos
+    
     def assertCanMoveToEmptySpot(self, piece_kind : Piece, color : Color, layout : str, first_move=True):
         """Given a layout, it checks if the piece can move to the position specified by '0'
         \npiece_kind: the piece that will be searched, not the instance
