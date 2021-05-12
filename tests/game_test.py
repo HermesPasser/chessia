@@ -1,6 +1,6 @@
 from engine.game import Game, MoveState
 from engine.color import Color
-from engine.pieces import Bishop, Rook
+from engine.pieces import Bishop, Rook, King
 from engine.position import Position
 from engine.move_result import MoveResult
 from utils import load_board
@@ -293,25 +293,47 @@ class GameTests(unittest.TestCase):
 
         rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
         self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.x, rook_pos.y - 1), MoveState.KING_WILL_BE_IN_CHECK)
+        
+        # testing castlling
+        load_board(self.game.board, \
+            '=K======' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '======R=' +\
+            '====k==r' )
 
-"""
-i think it should say the king is in check
-'===K====' +
-'===P====' +
-'===R====' +
-'Q=======' +
-'========' +
-'========' +
-'========' +
-'==b=k=p='
+        king_pos = self.game.board.get_piece_location(Color.WHITE, King)
+        rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
+        self.assertMoveState(Color.WHITE, king_pos, rook_pos, MoveState.KING_WILL_BE_IN_CHECK)
 
-stalemate (draw)
-'========' +
-'==r=r===' +
-'q=======' +
-'===K====' +
-'q=======' +
-'========' +
-'========' +
-'====k==='
-"""
+    def test_check_move_state_returns_king_path_attacked(self):
+        load_board(self.game.board, \
+            '=K===Q==' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '====k==r' )
+
+        king_pos = self.game.board.get_piece_location(Color.WHITE, King)
+        rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
+        self.assertMoveState(Color.WHITE, king_pos, rook_pos, MoveState.KING_PATH_ATTACKED)
+        
+        load_board(self.game.board, \
+            '=K=Q====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            'r===k===' )
+
+        king_pos = self.game.board.get_piece_location(Color.WHITE, King)
+        rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
+        self.assertMoveState(Color.WHITE, king_pos, rook_pos, MoveState.KING_PATH_ATTACKED)

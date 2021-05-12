@@ -64,23 +64,27 @@ class PieceTestBase(unittest.TestCase):
         land_under_attack = self.board.is_square_in_check(color, target_pos)
         return piece.can_move(self.board, piece_pos, target_pos, land_under_attack)
  
-    def assertCanMoveToNonEmptySpot(self, our_piece_kind : Piece, our_color : Color, other_piece_kind : Piece, other_color : Color, layout : str):
+    def assertCanMoveToNonEmptySpot(self, our_piece_kind : Piece, our_color : Color, other_piece_kind : Piece, other_color : Color, layout : str, our_first_move=True, other_first_move=True):
         """ """
-        rs = self._canPieceMoveToNonEmptySpot(our_piece_kind, other_piece_kind, our_color, other_color, layout)
+        rs = self._canPieceMoveToNonEmptySpot(our_piece_kind, other_piece_kind, our_color, other_color, layout, our_first_move, other_first_move)
         self.assertTrue(rs)
  
-    def assertCanNotMoveToNonEmptySpot(self, our_piece_kind : Piece, our_color : Color, other_piece_kind : Piece, other_color : Color, layout : str):
+    def assertCanNotMoveToNonEmptySpot(self, our_piece_kind : Piece, our_color : Color, other_piece_kind : Piece, other_color : Color, layout : str, our_first_move=True, other_first_move=True):
         """ """
-        rs = self._canPieceMoveToNonEmptySpot(our_piece_kind, other_piece_kind, our_color, other_color, layout)
+        rs = self._canPieceMoveToNonEmptySpot(our_piece_kind, other_piece_kind, our_color, other_color, layout, our_first_move, other_first_move)
         self.assertFalse(rs)
 
-    def _canPieceMoveToNonEmptySpot(self, our_piece_kind : Piece, other_piece_kind : Piece, our_color : Color, other_color : Color, layout : str) -> bool:
+    def _canPieceMoveToNonEmptySpot(self, our_piece_kind : Piece, other_piece_kind : Piece, our_color : Color, other_color : Color, layout : str, our_first_move=True, other_first_move=True) -> bool:
         load_board(self.board, layout)
         
         our_piece_pos = self.board.get_piece_location(our_color, our_piece_kind)
         our_piece = self.board.get(our_piece_pos.x, our_piece_pos.y)
-        
+        our_piece.is_first_move = our_first_move
+
         other_piece_pos = self.board.get_piece_location(other_color, other_piece_kind)
+        other_piece = self.board.get(other_piece_pos.x, other_piece_pos.y)
+        other_piece.is_first_move = other_first_move
         land_under_attack = self.board.is_square_in_check(our_color, other_piece_pos)
+        
         return our_piece.can_move(self.board, our_piece_pos, other_piece_pos, land_under_attack)
 

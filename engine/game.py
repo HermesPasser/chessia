@@ -1,4 +1,4 @@
-from engine.move_result import MoveResult
+from engine.move_result import MoveResult, CastlingMoveResult
 from engine.position import Position
 from engine.board import Board
 from engine.color import Color
@@ -15,6 +15,7 @@ class MoveState(Enum):
     KING_IN_CHECK = 4
     KING_WILL_BE_IN_CHECK = 5
     DRAW_BY_STALEMATE = 6
+    KING_PATH_ATTACKED = 7
 
 class ChessException(Exception):
     pass
@@ -40,11 +41,18 @@ class Game():
         self.board.set(position.x, position.y, None)
 
     def move(self, move : MoveResult):
-        if move.captured:
-            self._capture(move.captured_position)
+        if isinstance(move, CastlingMoveResult):
+            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = False
+            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = False
 
-        self.board.move(move.from_pos, move.to_pos)
-        move.piece.is_first_move = False
+            self.board.move(move.king_pos, move.king_final_pos)
+            self.board.move(move.rook_pos, move.rook_final_pos)
+        else:
+            if move.captured:
+                self._capture(move.captured_position)
+
+            self.board.move(move.from_pos, move.to_pos)
+            move.piece.is_first_move = False
 
         self.moves.append(move)
 
@@ -68,7 +76,15 @@ class Game():
             return
         
         move = self.moves.pop()
+        if isinstance(move, CastlingMoveResult):
+            self.board.move(move.king_final_pos, move.king_pos)
+            self.board.move(move.rook_final_pos, move.rook_pos)
+            
+            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = True
+            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = True
 
+            return
+        
         self.board.move(move.to_pos, move.from_pos)
         
         self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
@@ -124,7 +140,7 @@ class Game():
         if not turn:
             turn = self._turn
         
-        # hack to reset the state since we can't leave it True
+        # HACK to reset the state since we can't leave it True
         for piece, _ in self.board.iterate_material(turn):
             if isinstance(piece, Pawn):
                 piece.did_moved_twice = False
@@ -141,15 +157,31 @@ class Game():
         # the clicked piece is from the other player
         if piece.color != turn:
             return MoveState.NOT_YOUR_PIECE, None
-        
-        
+      
         land_under_attack = False
         if isinstance(piece, King):
             land_under_attack = self.board.is_square_in_check(turn, to_pos)
         
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
+        
+        # FIXME: will leave in check não funciona para movimento roque
         result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
         will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos)
+          
+        # TODO: this check is in king.can_move too since i can't figure the best way to
+        # place it. Since we dealing with messaging, i put the copy below but since is
+        # defined that is not a valid move from king if it will be in check so i put
+        # the same logic there. Maybe i can put MoveState as a MoveResult property
+        # and remove it from here.
+        # HACK: since the final position is a lie (end != rook pos but rook.x,rook.y-1)
+        # and we have to check if the ACTUAL position where the king is going is in check
+        if isinstance(result, CastlingMoveResult):
+            if self.board.is_square_in_check(turn, result.king_final_pos):
+                return MoveState.KING_WILL_BE_IN_CHECK, None 
+            
+            if self.board.is_square_in_check(self._turn, result.rook_final_pos):
+                return MoveState.KING_PATH_ATTACKED, None 
+        
         # check if the piece can be moved on the spot
         if result:
 
@@ -198,6 +230,8 @@ class Game():
             raise ChessException(f"You can't move since the king is in check")
         elif rs == MoveState.KING_WILL_BE_IN_CHECK:
             raise ChessException(f"If you move this piece there, the king will be in check")
+        elif rs == MoveState.KING_PATH_ATTACKED:
+            raise ChessException(f"Your can castle to this side since the king's patch is being attacked")
         else:
             pass # nothing
         
