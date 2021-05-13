@@ -5,6 +5,7 @@ from PyQt5 import Qt, QtCore, QtWidgets
 from utils import make_2d_array
 from engine.position import Position
 from engine.game import Game, ChessException
+from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
 
@@ -46,6 +47,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             print('turn changed to', self.game.get_current_turn())
     
     def _initialize_component(self):
+        self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
 
         centralWidget = Qt.QWidget()
@@ -86,6 +88,7 @@ class ChessBoardGUI(Qt.QMainWindow):
     def _click(self, sender, position):
         if self.ai_playing or self.game.game_ended:
             return
+
 
         if self.start_move:
             self._stop_move_piece(position)
