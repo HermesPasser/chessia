@@ -1,4 +1,4 @@
 # Poor Man's Chess (a.k.a chessia)
-ia/chess project made for ia class
+ai/chess project made for ai class
 
 This is the hacky-est chess implementation you have ever seen
