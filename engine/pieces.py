@@ -410,7 +410,10 @@ class Pawn(Piece):
 
         # since we can't check from the current pos since it would capture the pawn 
         next_position = Position(start.x + (1 if can_descend else -1), start.y)
-        enemy_ahead = len(board.get_pieces_range_vertical(next_position, end)) > 0
+        if next_position.x in (-1, 8):
+            enemy_ahead = False
+        else:
+            enemy_ahead = len(board.get_pieces_range_vertical(next_position, end)) > 0
 
         can_diagonally_descend = ((diff_x == -1 and diff_y == 1) or (diff_x == -1 and diff_y == -1)) and can_descend
         can_diagonally_ascend = ((diff_x == 1 and diff_y == 1) or (diff_x == 1 and diff_y == -1)) and can_ascend
