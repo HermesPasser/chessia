@@ -26,8 +26,7 @@ class GameTests(unittest.TestCase):
             '=p======' +
             'k===R===') # mate
         
-        self.game._turn = Color.WHITE
-        self.assertTrue(self.game._checkmated())
+        self.assertTrue(self.game._checkmated(Color.WHITE))
 
         load_board(self.game.board, \
             '===K====' +
@@ -39,8 +38,7 @@ class GameTests(unittest.TestCase):
             '========' +
             'k===R===') # not mate
         
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._checkmated())
+        self.assertFalse(self.game._checkmated(Color.WHITE))
         
         load_board(self.game.board, \
             '===K====' +
@@ -52,8 +50,7 @@ class GameTests(unittest.TestCase):
             '=p======' +
             'kp==R===') # not mate, queen can kil the attacker
         
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._checkmated())
+        self.assertFalse(self.game._checkmated(Color.WHITE))
 
         load_board(self.game.board, \
             '========' +
@@ -65,8 +62,7 @@ class GameTests(unittest.TestCase):
             '========' +
             '====k===')
         
-        self.game._turn = Color.BLACK
-        self.assertTrue(self.game._checkmated())
+        self.assertTrue(self.game._checkmated(Color.BLACK))
         
         load_board(self.game.board, \
             'RNB=KBNR' +
@@ -78,8 +74,7 @@ class GameTests(unittest.TestCase):
             'ppppp==p' +
             'rnbqkbnr') #  fool's mate
         
-        self.game._turn = Color.WHITE
-        self.assertTrue(self.game._checkmated())
+        self.assertTrue(self.game._checkmated(Color.WHITE))
         
         load_board(self.game.board, \
             'RNBQKBNR' +
@@ -91,8 +86,7 @@ class GameTests(unittest.TestCase):
             'pp=ppppp' +
             'rnb=kbnr') # is not fool's mate since can be blocked
         
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._checkmated())
+        self.assertFalse(self.game._checkmated(Color.WHITE))
 
         load_board(self.game.board,\
             '=======K' +
@@ -104,8 +98,7 @@ class GameTests(unittest.TestCase):
             '========' +
             '========') # is not mate since the king is not in check
         
-        self.game._turn = Color.BLACK
-        self.assertFalse(self.game._checkmated())
+        self.assertFalse(self.game._checkmated(Color.BLACK))
           
     def test_stalemate(self):
         load_board(self.game.board,\
@@ -118,12 +111,9 @@ class GameTests(unittest.TestCase):
             '========' +
             '========')
         
-        self.game._turn = Color.BLACK
-        self.assertTrue(self.game._stalemated())
-        
+        self.assertTrue(self.game._stalemated(Color.BLACK))
         # is only stalemate if is the turn of the king w/o moves
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._stalemated())
+        self.assertFalse(self.game._stalemated(Color.WHITE))
 
         load_board(self.game.board,\
             '=====K==' +
@@ -135,11 +125,8 @@ class GameTests(unittest.TestCase):
             '========' +
             '========')
         
-        self.game._turn = Color.BLACK
-        self.assertTrue(self.game._stalemated())
-        
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._stalemated())
+        self.assertTrue(self.game._stalemated(Color.BLACK))
+        self.assertFalse(self.game._stalemated(Color.WHITE))
         
         load_board(self.game.board,\
             'KB=====r' +
@@ -151,11 +138,9 @@ class GameTests(unittest.TestCase):
             '========' +
             '========')
         
-        self.game._turn = Color.BLACK
-        self.assertTrue(self.game._stalemated())
-        
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._stalemated())
+        self._turn = Color.BLACK
+        self.assertTrue(self.game._stalemated(Color.BLACK))
+        self.assertFalse(self.game._stalemated(Color.WHITE))
         
         load_board(self.game.board,\
             '========' +
@@ -167,11 +152,8 @@ class GameTests(unittest.TestCase):
             '=R======' +
             'k=======')
         
-        self.game._turn = Color.WHITE
-        self.assertTrue(self.game._stalemated())
-        
-        self.game._turn = Color.BLACK
-        self.assertFalse(self.game._stalemated())
+        self.assertTrue(self.game._stalemated(Color.WHITE))
+        self.assertFalse(self.game._stalemated(Color.BLACK))
         
         load_board(self.game.board,\
             '========' +
@@ -183,11 +165,8 @@ class GameTests(unittest.TestCase):
             'P=======' +
             'K=======')
         
-        self.game._turn = Color.BLACK
-        self.assertTrue(self.game._stalemated())
-        
-        self.game._turn = Color.WHITE
-        self.assertFalse(self.game._stalemated())
+        self.assertTrue(self.game._stalemated(Color.BLACK))
+        self.assertFalse(self.game._stalemated(Color.WHITE))
 
         load_board(self.game.board,\
             'k=======' +
@@ -199,11 +178,8 @@ class GameTests(unittest.TestCase):
             '========' +
             '========')
         
-        self.game._turn = Color.WHITE
-        self.assertTrue(self.game._stalemated())
-        
-        self.game._turn = Color.BLACK
-        self.assertFalse(self.game._stalemated())
+        self.assertTrue(self.game._stalemated(Color.WHITE))
+        self.assertFalse(self.game._stalemated(Color.BLACK))
 
     def test_check_move_state_returns_can_be_placed(self):
         load_board(self.game.board, \

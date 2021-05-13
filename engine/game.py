@@ -112,14 +112,14 @@ class Game():
 
         return will_be_in_check
 
-    def _checkmated(self):
-        checkmate = self.board.in_check(self._turn)
-        legal_moves = self.get_moves(self._turn)
+    def _checkmated(self, turn):
+        checkmate = self.board.in_check(turn)
+        legal_moves = self.get_moves(turn)
 
         for move in legal_moves:
             self.move(move)
 
-            if not self.board.in_check(self._turn):
+            if not self.board.in_check(turn):
                 checkmate = False
             
             self.undo()
@@ -129,8 +129,8 @@ class Game():
         
         return checkmate
 
-    def _stalemated(self):
-        if len(self.get_moves(self._turn)) == 0 and not self.board.in_check(self._turn):
+    def _stalemated(self, turn):
+        if len(self.get_moves(turn)) == 0 and not self.board.in_check(turn):
             return True
         return False
 
@@ -205,10 +205,12 @@ class Game():
         return MoveState.CAN_NOT_BE_PLACED, None
 
     def _check_end_game(self):
-        if self._checkmated():
+        # we check for the other player since he's the one who suffered by the last turn
+        the_other_player = self._turn.reverse()
+        if self._checkmated(the_other_player):
             self.game_ended = True
-            raise ChessException(f"CHECKMATE\n{self._turn.reverse()} have won!")
-        elif self._stalemated():
+            raise ChessException(f"CHECKMATE\n{the_other_player} have won!")
+        elif self._stalemated(the_other_player):
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
 
@@ -220,9 +222,10 @@ class Game():
 
         if rs == MoveState.CAN_BE_PLACED:
             self.move(mr)
-            self.change_turn()
-           
+
             self._check_end_game()
+            self.change_turn()
+
         elif rs == MoveState.CAN_NOT_BE_PLACED:
             raise ChessException("The selected piece can't be place on the selected spot")
         elif rs == MoveState.KING_IN_CHECK:
@@ -252,5 +255,7 @@ class Game():
             return (ai_move.from_pos, ai_move.to_pos)
 
     def play_turn_ia_end(self):
-        self.change_turn()
         self._check_end_game()
+        self.change_turn()
+
+
