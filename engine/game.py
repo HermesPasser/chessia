@@ -91,16 +91,16 @@ class Game():
         if move.captured:
             self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
         
-    def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position) -> bool:
+    def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position, turn) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
         piece_on_destination = self.board.get(to_pos.x, to_pos.y)
 
         if piece_on_destination:
-            if piece_on_destination.color == self._turn or isinstance(piece_on_destination, King):
+            if piece_on_destination.color == turn or isinstance(piece_on_destination, King):
                 return False 
         
         self.move(result)
-        will_be_in_check = self.board.in_check(self.get_current_turn())
+        will_be_in_check = self.board.in_check(turn)
         self.undo()
 
         # since the operation is not atomic if resultmove is false
@@ -165,7 +165,7 @@ class Game():
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
         
         result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
-        will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos)
+        will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos, turn)
           
         # TODO: this check is in king.can_move too since i can't figure the best way to
         # place it. Since we dealing with messaging, i put the copy below but since is
