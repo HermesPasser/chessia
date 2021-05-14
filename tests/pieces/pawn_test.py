@@ -438,3 +438,47 @@ class PawnTest(PieceTestBase):
             '========' +\
             '========' +\
             '========', first_move=False)
+
+    def test_can_promote_white(self):
+        self.assertPawnCanPromote(Color.WHITE, \
+            '===0====' +\
+            '===p====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+    
+    def test_can_promote_black(self):
+        self.assertPawnCanPromote(Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '====P===' +\
+            '====0===')
+            
+    def test_can_not_promote_white(self):
+        self.assertPawnCanNotPromote(Color.WHITE, \
+            '========' +\
+            '===0====' +\
+            '===p====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========')
+  
+    def test_can_not_promote_black(self):
+        self.assertPawnCanNotPromote(Color.BLACK, \
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '====P===' +\
+            '====0===' +\
+            '========')

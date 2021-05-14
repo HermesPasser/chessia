@@ -4,7 +4,7 @@ from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
 from utils import make_2d_array
 from engine.position import Position
-from engine.game import Game, ChessException
+from engine.game import Game, ChessException, PromotionException
 from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
@@ -100,6 +100,10 @@ class ChessBoardGUI(Qt.QMainWindow):
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
+            except PromotionException:
+                self.game.promote(self.promo_dialog.show())
+                # need to finish manually since we didn't change since a exception was raised
+                self.game.change_turn()
             except ChessException as e:
                 message = str(e)
 

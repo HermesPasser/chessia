@@ -21,6 +21,8 @@ class MoveResult(MoveResultBase):
         self.from_pos = None
         self.to_pos = None
         self.was_first_move = None
+        self.should_promote = False
+        self.promoted_to = None
     
     def set_moved_piece(self, piece, from_pos, to_pos, was_first_move):
         self.piece = piece

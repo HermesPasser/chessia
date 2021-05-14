@@ -2,7 +2,7 @@ from engine.move_result import MoveResult, CastlingMoveResult
 from engine.position import Position
 from engine.board import Board
 from engine.color import Color
-from engine.pieces import King, Pawn
+from engine.pieces import Piece, King, Queen, Pawn
 from utils import make_2d_array
 from enum import Enum
 import engine.ai as ai
@@ -20,12 +20,18 @@ class MoveState(Enum):
 class ChessException(Exception):
     pass
 
+# I would fown uppon seeing something like
+# this somewhere else but this is python
+class PromotionException(ChessException):
+    pass
+
 class Game():
     def __init__(self):
         self.board = Board()
         self._turn = Color.WHITE
         self.game_ended = False
         self.ai_difficulty = 3
+        self.move_result_waiting_promotion = None
         self.moves = []
 
     def get_current_turn(self):
@@ -52,6 +58,14 @@ class Game():
                 self._capture(move.captured_position)
 
             self.board.move(move.from_pos, move.to_pos)
+            if move.should_promote:
+                # since the a.i will simulate by moving the player's piece and therefore
+                # with promoted_to not selected
+                if not move.promoted_to:
+                    move.promoted_to = Queen(move.piece.color)
+                
+                self.board.set(move.to_pos.x, move.to_pos.y, move.promoted_to)
+                
             move.piece.is_first_move = False
 
         self.moves.append(move)
@@ -86,8 +100,11 @@ class Game():
             return
         
         self.board.move(move.to_pos, move.from_pos)
-        
+       
+        if move.should_promote:
+            self.board.set(move.from_pos.x, move.from_pos.y, move.piece)
         self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
+        
         if move.captured:
             self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
         
@@ -214,16 +231,26 @@ class Game():
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
 
+    def promote(self, piece : Piece):
+        self.move_result_waiting_promotion.promoted_to = piece(self._turn)
+        # since move is not called in play_turn if needs to promote
+        self.move(self.move_result_waiting_promotion)
+        self.move_result_waiting_promotion = None
+
     def play_turn (self, from_pos : Position, to_pos : Position):
-        if self.game_ended:
+        if self.game_ended or self.move_result_waiting_promotion:
             return None
 
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
-            self.move(mr)
 
             self._check_end_game()
+            if mr.should_promote:
+                self.move_result_waiting_promotion = mr
+                raise PromotionException()
+            
+            self.move(mr)
             self.change_turn()
 
         elif rs == MoveState.CAN_NOT_BE_PLACED:
@@ -238,7 +265,7 @@ class Game():
             pass # nothing
         
     def play_turn_ia_start(self):
-        if self.game_ended:
+        if self.game_ended or self.move_result_waiting_promotion:
             return None
         # since is confusing to de i.a do make
         # the move w/o the board being updated
@@ -249,13 +276,17 @@ class Game():
 
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
         if ai_move:
+
+            self._check_end_game()
+            if ai_move.should_promote:
+                ai_move.promoted_to = Queen(Color.BLACK)
+            
             self.move(ai_move)
         
             print("ai::", ai_move)
             return (ai_move.from_pos, ai_move.to_pos)
 
     def play_turn_ia_end(self):
-        self._check_end_game()
         self.change_turn()
 
 

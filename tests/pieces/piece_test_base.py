@@ -1,4 +1,4 @@
-from engine.pieces import Piece
+from engine.pieces import Piece, Pawn
 from engine.color import Color
 from engine.board import Board
 from utils import load_board
@@ -40,6 +40,16 @@ class PieceTestBase(unittest.TestCase):
         rs = piece.can_move(self.board, piece_pos, target_pos, land_under_attack)
         return rs and rs.captured_position == captured_pos
     
+    def assertPawnCanPromote(self, color : Color, layout : str):
+        """Assert if the pawn can be promoted after the move"""
+        rs = self._canPieceMoveToEmptySpot(Pawn, color, layout)
+        self.assertTrue(rs.should_promote)
+
+    def assertPawnCanNotPromote(self, color : Color, layout : str):
+        """Assert if the pawn can not be promoted after the move"""
+        rs = self._canPieceMoveToEmptySpot(Pawn, color, layout)
+        self.assertFalse(rs.should_promote)
+
     def assertCanMoveToEmptySpot(self, piece_kind : Piece, color : Color, layout : str, first_move=True):
         """Given a layout, it checks if the piece can move to the position specified by '0'
         \npiece_kind: the piece that will be searched, not the instance
@@ -87,4 +97,3 @@ class PieceTestBase(unittest.TestCase):
         land_under_attack = self.board.is_square_in_check(our_color, other_piece_pos)
         
         return our_piece.can_move(self.board, our_piece_pos, other_piece_pos, land_under_attack)
-

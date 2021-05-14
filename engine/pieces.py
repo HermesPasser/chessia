@@ -447,4 +447,9 @@ class Pawn(Piece):
         if valid_move and can_move_twice:
             self.did_moved_twice = True
         
-        return MoveResult(valid_move)
+        rs = MoveResult(valid_move)
+        # FIXME: same issue above
+        if self.is_white() and end.x == 0 or not self.is_white() and end.x == board.SIZE -1:
+            rs.should_promote = True
+
+        return rs
