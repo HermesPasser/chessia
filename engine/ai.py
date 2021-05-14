@@ -1,4 +1,4 @@
-from move_result import MoveResult
+from engine.move_result import MoveResult
 import random
 import math
 # Base: byanofsky.com/2017/07/06/building-a-simple-chess-ai/

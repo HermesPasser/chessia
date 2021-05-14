@@ -1,6 +1,6 @@
 from utils import make_2d_array
-from color import Color
-from pieces import *
+from engine.color import Color
+from engine.pieces import *
 from io import StringIO
 
 class Board():
@@ -41,10 +41,15 @@ class Board():
         if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
             raise Exception("Index out of bound")
 
+        if isinstance(piece, King):
+            if piece.color == Color.WHITE:
+                self.white_king_loc = Position(x, y)
+            else:
+                self.black_king_loc = Position(x, y)
+        
         self._board[x][y] = piece
 
     def move(self, from_pos : Position, to_pos : Position): 
-        print(from_pos, to_pos)
         prev = self._board[from_pos.x][from_pos.y]
         
         if isinstance(self._board[to_pos.x][to_pos.y], King):
@@ -55,9 +60,9 @@ class Board():
 
         if isinstance(prev, King):
             if prev.color == Color.WHITE:
-                self.white_king_loc = from_pos
+                self.white_king_loc = to_pos
             else:
-                self.black_king_loc = from_pos
+                self.black_king_loc = to_pos
 
     def get_piece_location(self, color : Color, type_piece : type) -> Position:
         if type(type_piece) is King:
@@ -80,11 +85,11 @@ class Board():
     # of the board.
     def is_square_in_check(self, color, pos_to_check : Position):
         is_empty_spot = self.is_empty_spot(pos_to_check.x, pos_to_check.y)
-        other_player_color = Color.BLACK if color == Color.WHITE else Color.WHITE
+        other_player_color = color.reverse()
        
         in_check = False
-        for x, y, piece in self._iterate():
-            if piece is not None and piece.color == other_player_color:                 
+        for piece, pos in self.iterate_material(other_player_color):
+            if piece is not None:
                 clear_spot = False
 
                 # Remember: the pawn eats diagonally and moves vertically
@@ -92,7 +97,7 @@ class Board():
                     clear_spot = True
                     self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
                 
-                if piece.can_move(self, Position(x, y), pos_to_check):
+                if piece.can_move(self, pos, pos_to_check):
                     in_check = True
 
                 if clear_spot:

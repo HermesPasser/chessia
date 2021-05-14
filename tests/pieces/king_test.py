@@ -1,6 +1,6 @@
-from pieces import Bishop, King, Knight, Pawn, Queen, Rook
-from color import Color
-from tests.piece_test_base import PieceTestBase
+from engine.pieces import Bishop, King, Knight, Pawn, Queen, Rook
+from engine.color import Color
+from tests.pieces.piece_test_base import PieceTestBase
 
 class KingTest(PieceTestBase):
     def test_can_move(self):
@@ -85,7 +85,6 @@ class KingTest(PieceTestBase):
             '===K====')
 
     def test_can_not_twice(self):
-        #
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \
             '========' +\
             '===0====' +\
@@ -179,6 +178,94 @@ class KingTest(PieceTestBase):
             '========' +\
             '========' +\
             '==K=====')
+
+    def test_can_black_castling_queen_side(self):
+        self.assertCanMoveToNonEmptySpot(King, Color.BLACK, Rook, Color.BLACK, \
+            'R===K===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '=k======')
+    
+    def test_can_black_castling_king_side(self):
+        self.assertCanMoveToNonEmptySpot(King, Color.BLACK, Rook, Color.BLACK, \
+            '====K==R' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '=k======')
+
+    def test_can_white_castling_queen_side(self):
+        self.assertCanMoveToNonEmptySpot(King, Color.WHITE, Rook, Color.WHITE, \
+            '=K======' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            'r===k===' )
+
+    def test_can_white_castling_king_side(self):
+        self.assertCanMoveToNonEmptySpot(King, Color.WHITE, Rook, Color.WHITE, \
+            '=K======' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '====k==r' )
+    
+    def test_can_not_castling_not_rook_first_move(self):
+        self.assertCanNotMoveToNonEmptySpot(King, Color.BLACK, Rook, Color.BLACK, \
+            'R===K===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '=k======', False, True)
+    
+    def test_can_not_castling_not_king_first_move(self):
+        self.assertCanNotMoveToNonEmptySpot(King, Color.BLACK, Rook, Color.BLACK, \
+            'R===K===' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '=k======', True, False)
+    
+    def test_can_castling_path_under_attack_queen_side(self):
+        self.assertCanNotMoveToNonEmptySpot(King, Color.WHITE, Rook, Color.WHITE, \
+            '=K=Q====' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            'r===k===' )
+  
+    def test_can_castling_path_under_attack_king_side(self):
+        self.assertCanNotMoveToNonEmptySpot(King, Color.WHITE, Rook, Color.WHITE, \
+            '=K======' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '========' +\
+            '======P=' +\
+            '====k==r' )
 
     def test_opposition(self):
         self.assertCanNotMoveToEmptySpot(King, Color.BLACK, \

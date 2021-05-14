@@ -2,12 +2,10 @@ import sys
 import time
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
-from position import Position
 from utils import make_2d_array
-from game import Game, ChessException
-from board import Board
-from pieces import Piece
-from color import Color
+from engine.position import Position
+from engine.game import Game, ChessException, PromotionException
+from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
 
@@ -22,14 +20,34 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
-        self.ai_turn = False
+        self.ai_playing = False 
+        self.no_ai = False
         self._initialize_component()
   
     def resizeEvent(self, event):
         self.resized.emit()
         super().resizeEvent(event)
 
+    def keyPressEvent(self, event):
+        key = event.key()
+ 
+        if key == QtCore.Qt.Key_Q and not self.ai_playing:
+            self.game.game_ended = False
+            self.game.undo()
+            self.game.undo()
+            self.update_ui()
+        elif key == QtCore.Qt.Key_W:
+            print(self.game.board)
+        elif key == QtCore.Qt.Key_R:
+            self.no_ai = not self.no_ai # turn a.i off
+            print('a.i off:', self.no_ai)
+        elif key == QtCore.Qt.Key_D:
+            self.game.change_turn()
+            self.update_ui()
+            print('turn changed to', self.game.get_current_turn())
+    
     def _initialize_component(self):
+        self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
 
         centralWidget = Qt.QWidget()
@@ -61,15 +79,16 @@ class ChessBoardGUI(Qt.QMainWindow):
                 btn = self.board_buttons[r][c]
                 btn.setText(str(piece) if piece else '')
 
-                fg = '#c9c9c9' if piece and piece.color == Color.WHITE else '#404040'
+                fg = '#c9c9c9' if piece and piece.color.is_white() else '#404040'
                 btn.set_foreground(fg)
 
-        current_turn = 'white' if self.game.get_current_turn() == Color.WHITE else 'black'
+        current_turn =  str(self.game.get_current_turn())
         self.setWindowTitle(f"{TITLE} - {current_turn} turn")
 
     def _click(self, sender, position):
-        if self.ai_turn or self.game.game_ended:
+        if self.ai_playing or self.game.game_ended:
             return
+
 
         if self.start_move:
             self._stop_move_piece(position)
@@ -81,6 +100,10 @@ class ChessBoardGUI(Qt.QMainWindow):
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
+            except PromotionException:
+                self.game.promote(self.promo_dialog.show())
+                # need to finish manually since we didn't change since a exception was raised
+                self.game.change_turn()
             except ChessException as e:
                 message = str(e)
 
@@ -93,7 +116,8 @@ class ChessBoardGUI(Qt.QMainWindow):
             return
         
         # since we can't say the turn ended just because not exception was thrown
-        if self.game.get_current_turn() == Color.BLACK:
+        if not self.no_ai and self.game.get_current_turn().is_black():
+            self.ai_playing = True
             self._call_worker()
 
     def _start_move_piece(self, sender, position):
@@ -107,8 +131,6 @@ class ChessBoardGUI(Qt.QMainWindow):
             self._select_square(sender)
 
     def _call_worker(self):
-        self.ai_turn = True
-
         self.thread = Qt.QThread()
         self.worker = Worker(self.game)
         self.worker.moveToThread(self.thread)
@@ -133,7 +155,7 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _worker_finished(self):
         self.game.play_turn_ia_end()
-        self.ai_turn = False
+        self.ai_playing = False
         self.update_ui()
 
     def _select_square(self, button):

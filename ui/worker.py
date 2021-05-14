@@ -1,4 +1,4 @@
-from game import ChessException
+from engine.game import ChessException
 from PyQt5 import Qt
 
 class Worker(Qt.QObject):
@@ -18,5 +18,6 @@ class Worker(Qt.QObject):
         except ChessException as e:
             message = str(e)
         
-        self.progress.emit(from_pos, to, message)
+        if from_pos and to:
+            self.progress.emit(from_pos, to, message)
         self.finished.emit()

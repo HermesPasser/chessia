@@ -1,7 +1,7 @@
-from pieces import Knight, King, Pawn
-from color import Color
+from engine.pieces import Knight, King, Pawn
+from engine.color import Color
 from tests import valid_moves
-from tests.piece_test_base import PieceTestBase
+from tests.pieces.piece_test_base import PieceTestBase
 
 # TODO: there is lots os replication here, refactor
 # TODO: check for invalid moves later

@@ -1,6 +1,6 @@
-from pieces import Rook, Pawn, Bishop
-from color import Color
-from tests.piece_test_base import PieceTestBase
+from engine.pieces import Rook, Pawn, Bishop
+from engine.color import Color
+from tests.pieces.piece_test_base import PieceTestBase
 
 class BishopTest(PieceTestBase):
     def test_can_move(self):
