@@ -246,7 +246,7 @@ class Game():
         if rs == MoveState.CAN_BE_PLACED:
 
             self._check_end_game()
-            if mr.should_promote:
+            if isinstance(mr, MoveResult) and mr.should_promote:
                 self.move_result_waiting_promotion = mr
                 raise PromotionException()
             
