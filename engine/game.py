@@ -195,7 +195,7 @@ class Game():
             if self.board.is_square_in_check(turn, result.king_final_pos):
                 return MoveState.KING_WILL_BE_IN_CHECK, None 
             
-            if self.board.is_square_in_check(self._turn, result.rook_final_pos):
+            if self.board.is_square_in_check(turn, result.rook_final_pos):
                 return MoveState.KING_PATH_ATTACKED, None 
         
         # check if the piece can be moved on the spot
