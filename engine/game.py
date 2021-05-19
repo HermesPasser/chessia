@@ -3,7 +3,6 @@ from engine.position import Position
 from engine.board import Board
 from engine.color import Color
 from engine.pieces import Piece, King, Queen, Pawn
-from utils import make_2d_array
 from enum import Enum
 import engine.ai as ai
 

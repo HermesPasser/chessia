@@ -1,10 +1,8 @@
-import sys
-import time
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
 from utils import make_2d_array
 from engine.position import Position
-from engine.game import Game, ChessException, PromotionException
+from engine.game import ChessException, PromotionException
 from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
