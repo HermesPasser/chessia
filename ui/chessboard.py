@@ -7,7 +7,7 @@ from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
 
-TITLE = 'Poor man\'s chessAI'
+TITLE = 'ChessIA'
 
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
