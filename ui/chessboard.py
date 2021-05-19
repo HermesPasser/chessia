@@ -13,8 +13,9 @@ class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
     finished = Qt.pyqtSignal()
 
-    def __init__(self, game):
+    def __init__(self, parent, game):
         super(ChessBoardGUI, self).__init__()
+        self.parent = parent
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
@@ -43,7 +44,13 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.game.change_turn()
             self.update_ui()
             print('turn changed to', self.game.get_current_turn())
+        elif key == QtCore.Qt.Key_Escape:
+            self._show_parent()
     
+    def _show_parent(self):
+        self.hide()
+        self.parent.show()
+
     def _initialize_component(self):
         self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
@@ -111,6 +118,8 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+            if 'CHECKMATE' in message or 'STALEMATE' in message:
+                self._show_parent()
             return
         
         # since we can't say the turn ended just because not exception was thrown
@@ -144,6 +153,8 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.update_ui()
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+            if 'CHECKMATE' in message or 'STALEMATE' in message:
+                self._call_ai_worker()
 
     def _ai_worker_finished(self):
         self.game.play_turn_ia_end()
