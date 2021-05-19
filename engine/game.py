@@ -26,6 +26,9 @@ class PromotionException(ChessException):
 
 class Game():
     def __init__(self):
+        self.restart()
+    
+    def restart(self):
         self.board = Board()
         self._turn = Color.WHITE
         self.game_ended = False
