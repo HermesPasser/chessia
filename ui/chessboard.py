@@ -116,7 +116,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         # since we can't say the turn ended just because not exception was thrown
         if not self.no_ai and self.game.get_current_turn().is_black():
             self.ai_playing = True
-            self._call_worker()
+            self._call_ai_worker()
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
@@ -128,19 +128,13 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.selected_spot_pos = position
             self._select_square(sender)
 
-    def _call_worker(self):
-        self.thread = Qt.QThread()
-        self.worker = Worker(self.game)
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.progress.connect(self._worker_progressed)
-        self.worker.finished.connect(lambda: self._worker_finished())
-        self.thread.start()
+    def _call_ai_worker(self):
+        self.worker = Worker.make_ai_worker(self.game)
+        self.worker.progress.connect(self._ai_worker_progressed)
+        self.worker.finished.connect(lambda: self._ai_worker_finished())
+        self.worker.start()
 
-    def _worker_progressed(self, from_pos, to_pos, message):
+    def _ai_worker_progressed(self, from_pos, to_pos, message):
         if not message:
             btn = self.board_buttons[from_pos.x][from_pos.y]
             btn2 = self.board_buttons[to_pos.x][to_pos.y]
@@ -151,7 +145,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
 
-    def _worker_finished(self):
+    def _ai_worker_finished(self):
         self.game.play_turn_ia_end()
         self.ai_playing = False
         self.update_ui()
