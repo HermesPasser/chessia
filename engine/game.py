@@ -3,7 +3,6 @@ from engine.position import Position
 from engine.board import Board
 from engine.color import Color
 from engine.pieces import Piece, King, Queen, Pawn
-from utils import make_2d_array
 from enum import Enum
 import engine.ai as ai
 
@@ -27,6 +26,9 @@ class PromotionException(ChessException):
 
 class Game():
     def __init__(self):
+        self.restart()
+    
+    def restart(self):
         self.board = Board()
         self._turn = Color.WHITE
         self.game_ended = False
@@ -242,6 +244,14 @@ class Game():
         self.move(self.move_result_waiting_promotion)
         self.move_result_waiting_promotion = None
 
+    def replay(self, coordinates):
+        for r1, c1, r2, c2 in coordinates:
+            _, rs = self._check_move_state(Position(r1, c1), Position(r2, c2), self._turn)
+            self.move(rs)
+            self._check_end_game() # is showing the wrong winner for some reason (it shows correctly in play_turn)
+            yield rs
+            self.change_turn()
+        
     def play_turn (self, from_pos : Position, to_pos : Position):
         if self.game_ended or self.move_result_waiting_promotion:
             return None

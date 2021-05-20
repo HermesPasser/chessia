@@ -1,22 +1,21 @@
-import sys
-import time
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
 from utils import make_2d_array
 from engine.position import Position
-from engine.game import Game, ChessException, PromotionException
+from engine.game import ChessException, PromotionException
 from ui.promotion_dialog import PromotionDialog
 from ui.button import Button
 from ui.worker import Worker
 
-TITLE = 'Poor man\'s chessAI'
+TITLE = 'ChessIA'
 
 class ChessBoardGUI(Qt.QMainWindow):
     resized = QtCore.pyqtSignal()
     finished = Qt.pyqtSignal()
 
-    def __init__(self, game):
+    def __init__(self, parent, game):
         super(ChessBoardGUI, self).__init__()
+        self.parent = parent
         self.game = game
         self.start_move = False
         self.selected_spot_pos = None
@@ -45,7 +44,17 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.game.change_turn()
             self.update_ui()
             print('turn changed to', self.game.get_current_turn())
+        elif key == QtCore.Qt.Key_Escape:
+            self._show_parent()
     
+    def _show_parent(self):
+        self.hide()
+        self.parent.show()
+
+    def replay(self, coordinates):
+        self.ai_playing = True
+        self._call_replay_worker(coordinates)
+
     def _initialize_component(self):
         self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
@@ -113,12 +122,14 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+            if 'CHECKMATE' in message or 'STALEMATE' in message:
+                self._show_parent()
             return
         
         # since we can't say the turn ended just because not exception was thrown
         if not self.no_ai and self.game.get_current_turn().is_black():
             self.ai_playing = True
-            self._call_worker()
+            self._call_ai_worker()
 
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
@@ -130,19 +141,13 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.selected_spot_pos = position
             self._select_square(sender)
 
-    def _call_worker(self):
-        self.thread = Qt.QThread()
-        self.worker = Worker(self.game)
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.progress.connect(self._worker_progressed)
-        self.worker.finished.connect(lambda: self._worker_finished())
-        self.thread.start()
+    def _call_ai_worker(self):
+        self.worker = Worker.make_ai_worker(self.game)
+        self.worker.progress.connect(self._ai_worker_progressed)
+        self.worker.finished.connect(lambda: self._ai_worker_finished())
+        self.worker.start()
 
-    def _worker_progressed(self, from_pos, to_pos, message):
+    def _ai_worker_progressed(self, from_pos, to_pos, message):
         if not message:
             btn = self.board_buttons[from_pos.x][from_pos.y]
             btn2 = self.board_buttons[to_pos.x][to_pos.y]
@@ -152,15 +157,30 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.update_ui()
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
+            if 'CHECKMATE' in message or 'STALEMATE' in message:
+                self._call_ai_worker()
 
-    def _worker_finished(self):
+    def _ai_worker_finished(self):
         self.game.play_turn_ia_end()
         self.ai_playing = False
         self.update_ui()
 
+    def _call_replay_worker(self, coordinates):
+        self.worker = Worker.make_replay_worker(self.game, coordinates)
+        self.worker.progress.connect(self._replay_worker_progressed)
+        self.worker.finished.connect(lambda: self._replay_worker_finished())  
+        self.worker.start()
+
+    def _replay_worker_progressed(self):
+        self.update_ui()
+
+    def _replay_worker_finished(self):
+        self.update_ui()
+        self.ai_playing = False
+
     def _select_square(self, button):
         button.set_foreground('green')
-  
+
     def _on_resize(self):
         for rows in self.board_buttons:
             for b in rows:
