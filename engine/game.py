@@ -64,7 +64,12 @@ class Game():
                 # since the a.i will simulate by moving the player's piece and therefore
                 # with promoted_to not selected
                 if not move.promoted_to:
-                    move.promoted_to = Queen(move.piece.color)
+                    # if no promotion is defined even thought we're moving and its player's
+                    # turn, so the move is a dummy to check if the other king is checkmate
+                    # therefore we can leave it as a pawn since the move will be undone
+                    # and the promoted piece will be set
+                    p = Pawn(Color.WHITE) if self._turn.is_white() else Queen(Color.BLACK)
+                    move.promoted_to = p
                 
                 self.board.set(move.to_pos.x, move.to_pos.y, move.promoted_to)
                 
@@ -197,7 +202,7 @@ class Game():
             if self.board.is_square_in_check(turn, result.king_final_pos):
                 return MoveState.KING_WILL_BE_IN_CHECK, None 
             
-            if self.board.is_square_in_check(self._turn, result.rook_final_pos):
+            if self.board.is_square_in_check(turn, result.rook_final_pos):
                 return MoveState.KING_PATH_ATTACKED, None 
         
         # check if the piece can be moved on the spot
@@ -228,7 +233,7 @@ class Game():
         the_other_player = self._turn.reverse()
         if self._checkmated(the_other_player):
             self.game_ended = True
-            raise ChessException(f"CHECKMATE\n{the_other_player} have won!")
+            raise ChessException(f"CHECKMATE\n{self._turn} have won!")
         elif self._stalemated(the_other_player):
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
@@ -255,12 +260,20 @@ class Game():
 
         if rs == MoveState.CAN_BE_PLACED:
 
+            print("you::", mr)
+            #FIXE: when the should promote is true, i think this is 
+            # promoting to queen and it can change to a unwanted checkmate
+            # , prevent the promotion when this dummy move is done
+            self.move(mr)
+
             self._check_end_game()
             if isinstance(mr, MoveResult) and mr.should_promote:
                 self.move_result_waiting_promotion = mr
+                # undo the move to actually promote and then do the move
+                # with the promotion
+                self.undo()
                 raise PromotionException()
             
-            self.move(mr)
             self.change_turn()
 
         elif rs == MoveState.CAN_NOT_BE_PLACED:
@@ -283,16 +296,16 @@ class Game():
         # being call on the play_turn()
         
         # TODO: we don't handle when the a.i don't have valid moves
-
+    
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
         if ai_move:
 
+            self.move(ai_move)
             self._check_end_game()
+            # kinda useless since by default will be promoted to queen
             if ai_move.should_promote:
                 ai_move.promoted_to = Queen(Color.BLACK)
             
-            self.move(ai_move)
-        
             print("ai::", ai_move)
             return (ai_move.from_pos, ai_move.to_pos)
 
