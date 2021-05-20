@@ -38,3 +38,8 @@ By default you can watch a fool's mate.
 ## License
 
 See _LICENSE_ file
+=======
+# Poor Man's Chess (a.k.a chessia)
+ai/chess project made for ai class
+
+This is the hacky-est chess implementation you will ever see
