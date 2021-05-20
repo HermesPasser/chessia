@@ -78,3 +78,13 @@ def make_spot(text):
 
 def make_spots(*args):
     return [make_spot(text) for text in args]
+
+def make_position_array(text):
+    pos = []
+    lines = text.split('\n')
+    for line in lines:
+        r, _, c, _, r2, _, c2 = list(line.strip())
+        tupl = (int(r), int(c), int(r2), int(c2))
+        pos.append(tupl)
+    
+    return pos
