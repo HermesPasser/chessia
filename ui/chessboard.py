@@ -51,6 +51,10 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.hide()
         self.parent.show()
 
+    def replay(self, coordinates):
+        self.ai_playing = True
+        self._call_replay_worker(coordinates)
+
     def _initialize_component(self):
         self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
@@ -161,9 +165,22 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.ai_playing = False
         self.update_ui()
 
+    def _call_replay_worker(self, coordinates):
+        self.worker = Worker.make_replay_worker(self.game, coordinates)
+        self.worker.progress.connect(self._replay_worker_progressed)
+        self.worker.finished.connect(lambda: self._replay_worker_finished())  
+        self.worker.start()
+
+    def _replay_worker_progressed(self):
+        self.update_ui()
+
+    def _replay_worker_finished(self):
+        self.update_ui()
+        self.ai_playing = False
+
     def _select_square(self, button):
         button.set_foreground('green')
-  
+
     def _on_resize(self):
         for rows in self.board_buttons:
             for b in rows:
