@@ -57,9 +57,9 @@ class CastlingMoveResult(MoveResultBase):
         self.king_pos = from_pos
         self.rook_pos = to_pos
 
-        if self.king_pos.y - self.rook_pos.y == 4: # long castling
-            self.king_final_pos = Position(self.king_pos.x, self.king_pos.y - 2)
-            self.rook_final_pos = Position(self.king_pos.x, self.king_pos.y - 1)
+        if self.king_pos.c - self.rook_pos.c == 4: # long castling
+            self.king_final_pos = Position(self.king_pos.r, self.king_pos.c - 2)
+            self.rook_final_pos = Position(self.king_pos.r, self.king_pos.c - 1)
         else:
-            self.king_final_pos = Position(self.king_pos.x, self.king_pos.y + 2)
-            self.rook_final_pos = Position(self.king_pos.x, self.king_pos.y + 1)
+            self.king_final_pos = Position(self.king_pos.r, self.king_pos.c + 2)
+            self.rook_final_pos = Position(self.king_pos.r, self.king_pos.c + 1)

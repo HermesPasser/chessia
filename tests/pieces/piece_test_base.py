@@ -10,7 +10,7 @@ class PieceTestBase(unittest.TestCase):
 
     def get_targed_and_clean_spot(self):
         pos = self.board.get_piece_location(Color.BLACK, Piece)
-        self.board.set(pos.x, pos.y, None)
+        self.board.set(pos.r, pos.c, None)
         return pos
 
     def assertCanMoveToEmptySpotEnPassant(self, piece_kind : Piece, color : Color, enemy_kind : Piece, enemy_color : Color, layout : str, enemy_did_moved_twice=True):
@@ -30,10 +30,10 @@ class PieceTestBase(unittest.TestCase):
         target_pos = self.get_targed_and_clean_spot()
         
         piece_pos = self.board.get_piece_location(color, piece_kind)
-        piece = self.board.get(piece_pos.x, piece_pos.y)
+        piece = self.board.get(piece_pos.r, piece_pos.c)
 
         captured_pos = self.board.get_piece_location(enemy_color, enemy_kind)
-        captured = self.board.get(captured_pos.x, captured_pos.y)
+        captured = self.board.get(captured_pos.r, captured_pos.c)
         captured.did_moved_twice = enemy_did_moved_twice
 
         land_under_attack = self.board.is_square_in_check(color, target_pos)
@@ -69,7 +69,7 @@ class PieceTestBase(unittest.TestCase):
         target_pos = self.get_targed_and_clean_spot()
         
         piece_pos = self.board.get_piece_location(color, piece_kind)
-        piece = self.board.get(piece_pos.x, piece_pos.y)
+        piece = self.board.get(piece_pos.r, piece_pos.c)
         piece.is_first_move = first_move
         land_under_attack = self.board.is_square_in_check(color, target_pos)
         return piece.can_move(self.board, piece_pos, target_pos, land_under_attack)
@@ -88,11 +88,11 @@ class PieceTestBase(unittest.TestCase):
         load_board(self.board, layout)
         
         our_piece_pos = self.board.get_piece_location(our_color, our_piece_kind)
-        our_piece = self.board.get(our_piece_pos.x, our_piece_pos.y)
+        our_piece = self.board.get(our_piece_pos.r, our_piece_pos.c)
         our_piece.is_first_move = our_first_move
 
         other_piece_pos = self.board.get_piece_location(other_color, other_piece_kind)
-        other_piece = self.board.get(other_piece_pos.x, other_piece_pos.y)
+        other_piece = self.board.get(other_piece_pos.r, other_piece_pos.c)
         other_piece.is_first_move = other_first_move
         land_under_attack = self.board.is_square_in_check(our_color, other_piece_pos)
         

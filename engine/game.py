@@ -43,15 +43,15 @@ class Game():
        self._turn = self._turn.reverse()
 
     def is_empty_spot(self, position : Position) -> bool:
-        return self.board.is_empty_spot(position.x, position.y)
+        return self.board.is_empty_spot(position.r, position.c)
 
     def _capture(self, position : Position):
-        self.board.set(position.x, position.y, None)
+        self.board.set(position.r, position.c, None)
 
     def move(self, move : MoveResult):
         if isinstance(move, CastlingMoveResult):
-            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = False
-            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = False
+            self.board.get(move.king_pos.r, move.king_pos.c).is_first_move = False
+            self.board.get(move.rook_pos.r, move.rook_pos.c).is_first_move = False
 
             self.board.move(move.king_pos, move.king_final_pos)
             self.board.move(move.rook_pos, move.rook_final_pos)
@@ -66,7 +66,7 @@ class Game():
                 if not move.promoted_to:
                     move.promoted_to = Queen(move.piece.color)
                 
-                self.board.set(move.to_pos.x, move.to_pos.y, move.promoted_to)
+                self.board.set(move.to_pos.r, move.to_pos.c, move.promoted_to)
                 
             move.piece.is_first_move = False
 
@@ -96,23 +96,23 @@ class Game():
             self.board.move(move.king_final_pos, move.king_pos)
             self.board.move(move.rook_final_pos, move.rook_pos)
             
-            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = True
-            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = True
+            self.board.get(move.king_pos.r, move.king_pos.c).is_first_move = True
+            self.board.get(move.rook_pos.r, move.rook_pos.c).is_first_move = True
 
             return
         
         self.board.move(move.to_pos, move.from_pos)
        
         if move.should_promote:
-            self.board.set(move.from_pos.x, move.from_pos.y, move.piece)
-        self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
+            self.board.set(move.from_pos.r, move.from_pos.c, move.piece)
+        self.board.get(move.from_pos.r, move.from_pos.c).is_first_move = move.was_first_move
         
         if move.captured:
-            self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
+            self.board.set(move.captured_position.r, move.captured_position.c, move.captured)
         
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position, turn) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
-        piece_on_destination = self.board.get(to_pos.x, to_pos.y)
+        piece_on_destination = self.board.get(to_pos.r, to_pos.c)
 
         if piece_on_destination:
             if piece_on_destination.color == turn or isinstance(piece_on_destination, King):
@@ -127,7 +127,7 @@ class Game():
         # of the flawed way i handle the current/next turn check
         # verifying code
         if not result and piece_on_destination:
-            self.board.set(to_pos.x, to_pos.y, piece_on_destination)
+            self.board.set(to_pos.r, to_pos.c, piece_on_destination)
 
         return will_be_in_check
 
@@ -164,7 +164,7 @@ class Game():
             if isinstance(piece, Pawn):
                 piece.did_moved_twice = False
 
-        piece = self.board.get(from_pos.x, from_pos.y)
+        piece = self.board.get(from_pos.r, from_pos.c)
         selected_piece_is_our_king = type(piece) is King and piece.color == turn
         is_in_check = self.board.in_check(turn)
         
@@ -191,7 +191,7 @@ class Game():
         # defined that is not a valid move from king if it will be in check so i put
         # the same logic there. Maybe i can put MoveState as a MoveResult property
         # and remove it from here.
-        # HACK: since the final position is a lie (end != rook pos but rook.x,rook.y-1)
+        # HACK: since the final position is a lie (end != rook pos but rook.r,rook.c-1)
         # and we have to check if the ACTUAL position where the king is going is in check
         if isinstance(result, CastlingMoveResult):
             if self.board.is_square_in_check(turn, result.king_final_pos):

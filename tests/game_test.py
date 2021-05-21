@@ -211,7 +211,7 @@ class GameTests(unittest.TestCase):
         self.assertMoveState(Color.WHITE, bishop_pos, Position(6, 4), MoveState.CAN_NOT_BE_PLACED)
 
         rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
-        self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.x, rook_pos.y + 1), MoveState.CAN_BE_PLACED)
+        self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.r, rook_pos.c + 1), MoveState.CAN_BE_PLACED)
    
     def test_check_move_state_returns_not_your_piece(self):
         load_board(self.game.board, \
@@ -224,7 +224,7 @@ class GameTests(unittest.TestCase):
             '========' +
             '===k====')
         bishop_pos = self.game.board.get_piece_location(Color.BLACK, Bishop)
-        self.assertMoveState(Color.WHITE, bishop_pos, Position(bishop_pos.x, bishop_pos.y + 1), MoveState.NOT_YOUR_PIECE)
+        self.assertMoveState(Color.WHITE, bishop_pos, Position(bishop_pos.r, bishop_pos.c + 1), MoveState.NOT_YOUR_PIECE)
 
     def test_check_move_state_returns_no_piece_to_move(self):
         load_board(self.game.board, \
@@ -268,7 +268,7 @@ class GameTests(unittest.TestCase):
             '====k===')
 
         rook_pos = self.game.board.get_piece_location(Color.WHITE, Rook)
-        self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.x, rook_pos.y - 1), MoveState.KING_WILL_BE_IN_CHECK)
+        self.assertMoveState(Color.WHITE, rook_pos, Position(rook_pos.r, rook_pos.c - 1), MoveState.KING_WILL_BE_IN_CHECK)
         
         # testing castlling
         load_board(self.game.board, \

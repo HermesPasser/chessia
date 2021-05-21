@@ -24,7 +24,7 @@ class BoardTests(unittest.TestCase):
     def actual_is_square_in_check_returns_true(self, layout):
         load_board(self.board, layout)
         target_pos = self.board.get_piece_location(Color.BLACK, Piece)
-        self.board.set(target_pos.x, target_pos.y, None)
+        self.board.set(target_pos.r, target_pos.c, None)
         self.assertTrue(self.board.is_square_in_check(Color.WHITE, target_pos))
 
     def test_is_square_in_check_returns_true_pawn(self):
@@ -232,9 +232,9 @@ class BoardTests(unittest.TestCase):
         for l in layouts:
             self.actual_is_in_check_returns_true(Color.BLACK, l)
 
-    def actual_get_test(self, x, y, piece_char):
+    def actual_get_test(self, row, col, piece_char):
         load_board(self.board, BoardTests.board_layout)
-        rs = self.board.get(x, y)
+        rs = self.board.get(row, col)
         self.assertEqual(rs, piece_from_char(piece_char))
 
     def test_get(self):
@@ -297,7 +297,7 @@ class BoardTests(unittest.TestCase):
 
     def actual_diagonal_test(self, position_start, position_end, expected):     
         load_board(self.board, BoardTests.board_layout)
-        rs = self.board.get_pieces_range_diagonal(position_start.x, position_start.y, position_end.x, position_end.y)
+        rs = self.board.get_pieces_range_diagonal(position_start.r, position_start.c, position_end.r, position_end.c)
         self.assertSequenceEqual(rs, expected)
 
     def test_get_pieces_range_diagonal_nw_se_1(self):

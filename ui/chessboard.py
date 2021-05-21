@@ -149,8 +149,8 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _ai_worker_progressed(self, from_pos, to_pos, message):
         if not message:
-            btn = self.board_buttons[from_pos.x][from_pos.y]
-            btn2 = self.board_buttons[to_pos.x][to_pos.y]
+            btn = self.board_buttons[from_pos.r][from_pos.c]
+            btn2 = self.board_buttons[to_pos.r][to_pos.c]
             self._select_square(btn)
             self._select_square(btn2)
         
