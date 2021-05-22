@@ -3,6 +3,10 @@ from engine.position import Position
 
 class MoveResultBase:
     
+    def set_succeed(self, succeed):
+        self.succeed = succeed
+        return self
+
     def __bool__(self):
         return self.succeed
     
@@ -13,22 +17,21 @@ class MoveResultBase:
 
 
 class MoveResult(MoveResultBase):
-    def __init__(self, succeed : bool, captured=None):
-        """captured: (Piece, Position), optional"""
-        self.succeed = succeed
-        self.captured, self.captured_position = captured or (None, None)
-        self.piece = None
-        self.from_pos = None
-        self.to_pos = None
-        self.was_first_move = None
-        self.should_promote = False
-        self.promoted_to = None
-    
-    def set_moved_piece(self, piece, from_pos, to_pos, was_first_move):
+    def __init__(self, piece, from_pos, to_pos, was_first_move):
         self.piece = piece
         self.from_pos = from_pos
         self.to_pos = to_pos
         self.was_first_move = was_first_move
+        self.succeed = False
+        self.captured = None
+        self.captured_position = None
+        self.should_promote = False
+        self.promoted_to = None
+    
+    def capture(self, piece, position):
+        self.captured = piece
+        self.captured_position = position
+        return self
 
     def __repr__(self):
         captured = f", capured: {self.captured}" if self.captured is not None else ''
@@ -53,7 +56,14 @@ class CastlingMoveResult(MoveResultBase):
         self.king_final_pos = None
         self.king_pos = None
     
-    def set_moved_piece(self, piece, from_pos, to_pos, was_first_move):
+    @staticmethod
+    def from_move_result(result):
+        castling = CastlingMoveResult()
+        castling.succeed = result.succeed
+        castling.set_moved_piece(result.from_pos, result.to_pos)
+        return castling
+
+    def set_moved_piece(self, from_pos, to_pos):
         self.king_pos = from_pos
         self.rook_pos = to_pos
 

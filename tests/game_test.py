@@ -75,7 +75,7 @@ class GameTests(unittest.TestCase):
             'rnbqkbnr') #  fool's mate
         
         self.assertTrue(self.game._checkmated(Color.WHITE))
-        
+        #
         load_board(self.game.board, \
             'RNBQKBNR' +
             'PPP=PPPP' +

@@ -182,8 +182,6 @@ class Game():
             land_under_attack = self.board.is_square_in_check(turn, to_pos)
         
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
-        
-        result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
         will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos, turn)
           
         # TODO: this check is in king.can_move too since i can't figure the best way to

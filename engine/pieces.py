@@ -38,7 +38,7 @@ class Piece():
         """Returns true if the piece can move from 'start' to 'end'\n
         
         land_under_attack: if true, the position were the piece is tryingto move is under attack"""
-        raise NotImplementedError(f"Not implemented for '{type(self)}'")
+        return MoveResult(self, start, end, self.is_first_move)
 
     def to_unicode(self):
         raise NotImplementedError(f"Not implemented for '{type(self)}'")
@@ -56,33 +56,34 @@ class Piece():
         piece = board.get(position.r, position.c)
         return piece is not None and piece.color != self.color
 
-    def handle_jump_over_pieces(self, board, end : Position, squares : list) -> MoveResult:
+    def handle_jump_over_pieces(self, board, result : MoveResult, squares : list) -> MoveResult:
         """Given a list of spots/squares (Piece, Position) it returns a result move if is no piece was jumped over
         It assumes if is not empty, then the first the piece who called the method.
         """
+        end = result.to_pos
         if squares:
             squares.pop(0) # pop self
 
         jumped_over_pieces = len(squares) > 1
         if jumped_over_pieces:
-            return MoveResult(False)  
+            return result 
         
-        captured_piece = None
         if len(squares) == 1:
             landed_spot = Position(squares[0][1], squares[0][2]) 
             landed_piece = squares[0][0]
             
             jumped_over_a_piece = landed_spot != end
             if jumped_over_a_piece:
-                return MoveResult(False)
+                return result
             
             landed_on_friend = landed_piece.color == self.color
             if landed_on_friend:
-                return MoveResult(False)
-            
-            captured_piece = (landed_piece, landed_spot)
-             
-        return MoveResult(True, captured_piece)  
+                return result
+
+            if landed_piece:
+                result.capture(landed_piece, landed_spot) 
+                     
+        return result.set_succeed(True)
             
 
 class King(Piece):
@@ -112,9 +113,10 @@ class King(Piece):
 
     # TODO: implement castling and prevent the
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         # where a enemy piece can reach, the king don't
         if land_under_attack:
-            return MoveResult(False)
+            return result
         
         piece = board.get(end.r, end.c)
 
@@ -124,16 +126,14 @@ class King(Piece):
             no_pieces_in_the_way = len(board.get_pieces_range_horizontal(start, end)) == 2
             is_valid_castling = isinstance(piece, Rook) and self.is_first_move and piece.is_first_move and no_pieces_in_the_way
             
-            result = CastlingMoveResult()
-            result.set_moved_piece(None, start, end, None)
-            
+            castling = CastlingMoveResult.from_move_result(result)            
             if is_valid_castling:
-                safe_path = not board.is_square_in_check(self.color, result.rook_final_pos)
-                safe_landing = not board.is_square_in_check(self.color, result.king_final_pos)
-                result.succeed = safe_path and safe_landing
-                return result
+                safe_path = not board.is_square_in_check(self.color, castling.rook_final_pos)
+                safe_landing = not board.is_square_in_check(self.color, castling.king_final_pos)
+                castling.succeed = safe_path and safe_landing
+                return castling
 
-            return MoveResult(False)
+            return result
         
         king_on_target = isinstance(piece, King) and piece.color != self.color
 
@@ -150,16 +150,16 @@ class King(Piece):
         other_king_pos = board.get_king_loc_by_color(other_color)
         other_king_too_close = distance(end, other_king_pos) < 2
         
-        captured_piece = None
         if piece and not king_on_target:
-            captured_piece = (piece, end)
+            result.capture(piece, end)
 
         valid_move = (
             not king_on_target and
             not other_king_too_close and
             (can_move_diagonally or can_move_r or can_move_c)
         )
-        return MoveResult(valid_move, captured_piece)
+
+        return result.set_succeed(valid_move)
 
 
 class Queen(Piece):
@@ -173,8 +173,9 @@ class Queen(Piece):
         return Rook(self.color).get_pseudo_moves(current_pos) + Bishop(self.color).get_pseudo_moves(current_pos)
 
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         if self.has_same_color(board, end):
-            return MoveResult(False)
+            return result
         
         abs_r = abs(start.r - end.r)
         abs_c = abs(start.c - end.c)
@@ -190,9 +191,9 @@ class Queen(Piece):
 
         valid_move = (can_move_vertical or can_move_diagonal)
         if not valid_move:
-            return MoveResult(False)
+            return result
 
-        return self.handle_jump_over_pieces(board, end, squares)
+        return self.handle_jump_over_pieces(board, result, squares)
 
 
 class Rook(Piece):
@@ -227,8 +228,9 @@ class Rook(Piece):
         return moves
 
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         if self.has_same_color(board, end):
-            return MoveResult(False)
+            return result
         
         abs_r = abs(start.r - end.r)
         abs_c = abs(start.c - end.c)
@@ -244,9 +246,9 @@ class Rook(Piece):
 
         valid_move = (can_move_r or can_move_c)
         if not valid_move:
-            return MoveResult(False)
+            return result
 
-        return self.handle_jump_over_pieces(board, end, squares)  
+        return self.handle_jump_over_pieces(board, result, squares)  
 
 
 class Bishop(Piece):  
@@ -281,8 +283,9 @@ class Bishop(Piece):
         return moves
 
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         if self.has_same_color(board, end):
-            return MoveResult(False)
+            return result
 
         abs_r = abs(start.r - end.r)
         abs_c = abs(start.c - end.c)
@@ -292,9 +295,9 @@ class Bishop(Piece):
 
         valid_move = can_move_diagonal
         if not valid_move:
-            return MoveResult(False)
+            return result
 
-        return self.handle_jump_over_pieces(board, end, squares)
+        return self.handle_jump_over_pieces(board, result, squares)
 
 
 class Knight(Piece):
@@ -317,18 +320,18 @@ class Knight(Piece):
         return [move for move in moves if in_range(move.r) and in_range(move.c)]
 
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         if self.has_same_color(board, end):
-            return MoveResult(False)
+            return result
 
         abs_r = abs(start.r - end.r)
         abs_c = abs(start.c - end.c)
         valid_move = (abs_r == 2 and abs_c == 1) or (abs_r == 1 and abs_c == 2)
 
-        captured_piece = None
         if valid_move:
-            captured_piece = (board.get(end.r, end.c), end)
+            result.capture(board.get(end.r, end.c), end)
 
-        return MoveResult(valid_move, captured_piece)
+        return result.set_succeed(valid_move)
 
 
 class Pawn(Piece):
@@ -372,7 +375,8 @@ class Pawn(Piece):
 
         return [move for move in moves if in_range(move.r) and in_range(move.c)]
 
-    def handle_el_passant(self, board, start, col):       
+    def handle_el_passant(self, board, result, col):       
+        start = result.from_pos
         captured_piece = None
         going_left = col == 1
         going_right = col == -1
@@ -386,14 +390,15 @@ class Pawn(Piece):
 
         can_en_passant = isinstance(captured_piece, Pawn) and pos.r in Pawn.MIDDLE_ROWS and captured_piece.did_moved_twice
         if can_en_passant:
-            return MoveResult(True, captured=(captured_piece, pos))
+            return result.set_succeed(True).capture(captured_piece, pos)
         
-        return MoveResult(False)
+        return result
         
     # TODO: handle pomotion
     def can_move(self, board, start, end, land_under_attack=False):
+        result = super().can_move(board, start, end, land_under_attack)
         if self.has_same_color(board, end):
-            return MoveResult(False)
+            return result
         
         diff_r = start.r - end.r
         diff_c = start.c - end.c
@@ -419,10 +424,10 @@ class Pawn(Piece):
         can_diagonally_ascend = ((diff_r == 1 and diff_c == 1) or (diff_r == 1 and diff_c == -1)) and can_ascend
         if has_a_enemy_piece and (can_diagonally_descend or can_diagonally_ascend):
             captured_piece = board.get(end.r, end.c)
-            return MoveResult(True, captured=(captured_piece, end))
+            return result.set_succeed(True).capture(captured_piece, end)
         
         if not enemy_ahead and can_diagonally_descend or can_diagonally_ascend:
-            el_passant_result = self.handle_el_passant(board, start, diff_c)
+            el_passant_result = self.handle_el_passant(board, result, diff_c)
             if el_passant_result:
                 return el_passant_result
         
@@ -447,9 +452,8 @@ class Pawn(Piece):
         if valid_move and can_move_twice:
             self.did_moved_twice = True
         
-        rs = MoveResult(valid_move)
         # FIXME: same issue above
         if self.is_white() and end.r == 0 or not self.is_white() and end.r == board.SIZE -1:
-            rs.should_promote = True
+            result.should_promote = True
 
-        return rs
+        return result.set_succeed(valid_move)
