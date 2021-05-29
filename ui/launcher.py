@@ -11,7 +11,7 @@ class LauncherUI(QtWidgets.QDialog):
         self._initialize_component()
 
     def _initialize_component(self):
-        uic.loadUi("ui\launcher.ui", self)
+        uic.loadUi("ui/launcher.ui", self)
         self.setWindowTitle(TITLE)
         self.board.setMinimumSize(600, 600)
         self.playButton.clicked.connect(self.open_board)
