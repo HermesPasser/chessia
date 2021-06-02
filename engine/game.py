@@ -72,7 +72,20 @@ class Game():
 
         self.moves.append(move)
 
+    def get_valid_moves_raw(self, piece, pos) -> list:
+        """Returns all the spots thar a spefic 'piece' can be placed given its position 'pos'."""
+        legal_moves = []
+        pseudo_moves = piece.get_pseudo_moves(pos)
+
+        for pseudo in pseudo_moves:
+            rs, result = self._check_move_state(pos, pseudo, piece.color)
+            if rs == MoveState.CAN_BE_PLACED and result:
+                legal_moves.append(pseudo)
+    
+        return legal_moves
+
     def get_moves(self, color) -> MoveResult:
+        """Returns a list of all possible valid MoveResults that a given rank can do."""
         # loop tru all pieces from a color
         moves = []
         for p, pos in self.board.iterate_material(color):
