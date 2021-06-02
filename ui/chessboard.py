@@ -22,6 +22,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.ai_playing = False 
         self.no_ai = False
         self.possible_places = []
+        self.ai_patch = []
         self._initialize_component()
   
     def resizeEvent(self, event):
@@ -86,8 +87,11 @@ class ChessBoardGUI(Qt.QMainWindow):
                 piece = board.get(r,c)
                 btn = self.board_buttons[r][c]
                 btn.setText(str(piece) if piece else '')
-
-                if Position(r, c) in self.possible_places:
+                
+                pos = Position(r, c) 
+                if pos in self.ai_patch:
+                    bg = '#ffcfcf' if (r + c) % 2 == 0 else '#400000'
+                elif pos in self.possible_places:
                     bg = '#cfffdf' if (r + c) % 2 == 0 else '#004000'
                 else:
                     bg = 'white' if (r + c) % 2 == 0 else 'black'
@@ -159,12 +163,9 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _ai_worker_progressed(self, from_pos, to_pos, message):
         if not message:
-            btn = self.board_buttons[from_pos.r][from_pos.c]
-            btn2 = self.board_buttons[to_pos.r][to_pos.c]
-            self._select_square(btn)
-            self._select_square(btn2)
+            self.ai_patch = [from_pos, to_pos]
+            self.update_ui()
         
-        self.update_ui()
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
             if 'CHECKMATE' in message or 'STALEMATE' in message:
@@ -174,6 +175,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.game.play_turn_ia_end()
         self.ai_playing = False
         self.update_ui()
+        self.ai_patch = [] # will be cleaned when the player start doing its move
 
     def _call_replay_worker(self, coordinates):
         self.worker = Worker.make_replay_worker(self.game, coordinates)
