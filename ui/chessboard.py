@@ -21,6 +21,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.selected_spot_pos = None
         self.ai_playing = False 
         self.no_ai = False
+        self.possible_places = []
         self._initialize_component()
   
     def resizeEvent(self, event):
@@ -71,14 +72,12 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.board_buttons = make_2d_array(range(0, 8), None)    
         for r in range(0, 8):
             for c in range(0, 8):
-                bg = 'white' if (r + c) % 2 == 0 else 'black'
                 btn = Button(f'{r}x{c}', self)
-                btn.set_background(bg)
                 btn.clicked.connect(partial(self._click, btn, Position(r, c)))
 
                 self.layout.addWidget(btn, r, c)
                 self.board_buttons[r][c] = btn
-    
+
     def update_ui(self):
         board = self.game.board
 
@@ -88,7 +87,13 @@ class ChessBoardGUI(Qt.QMainWindow):
                 btn = self.board_buttons[r][c]
                 btn.setText(str(piece) if piece else '')
 
+                if Position(r, c) in self.possible_places:
+                    bg = '#cfffdf' if (r + c) % 2 == 0 else '#004000'
+                else:
+                    bg = 'white' if (r + c) % 2 == 0 else 'black'
+
                 fg = '#c9c9c9' if piece and piece.color.is_white() else '#404040'
+                btn.set_background(bg)
                 btn.set_foreground(fg)
 
         current_turn =  str(self.game.get_current_turn())
@@ -104,6 +109,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             self._start_move_piece(sender, position)
 
     def _stop_move_piece(self, position):
+        self.possible_places = []
         message = False
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
@@ -134,7 +140,12 @@ class ChessBoardGUI(Qt.QMainWindow):
         # no point on starting the selection if the place has nothing
         if self.game.is_empty_spot(position):
             return
-        
+
+        piece = self.game.board.get(position.r, position.c)
+        if piece.is_white():
+            self.possible_places = self.game.get_valid_moves_raw(piece, position)
+            self.update_ui() # show the valid moves
+
         self.move_started = True
         if sender is not None:
             self.selected_spot_pos = position
