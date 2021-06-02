@@ -17,7 +17,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         super(ChessBoardGUI, self).__init__()
         self.parent = parent
         self.game = game
-        self.start_move = False
+        self.move_started = False
         self.selected_spot_pos = None
         self.ai_playing = False 
         self.no_ai = False
@@ -98,8 +98,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         if self.ai_playing or self.game.game_ended:
             return
 
-
-        if self.start_move:
+        if self.move_started:
             self._stop_move_piece(position)
         else:
             self._start_move_piece(sender, position)
@@ -118,7 +117,7 @@ class ChessBoardGUI(Qt.QMainWindow):
 
         self.update_ui()
         self.selected_spot_pos = None
-        self.start_move = False
+        self.move_started = False
 
         if message:
             QtWidgets.QMessageBox.about(self, TITLE, message)
@@ -136,7 +135,7 @@ class ChessBoardGUI(Qt.QMainWindow):
         if self.game.is_empty_spot(position):
             return
         
-        self.start_move = True
+        self.move_started = True
         if sender is not None:
             self.selected_spot_pos = position
             self._select_square(sender)
