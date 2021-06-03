@@ -190,6 +190,19 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.update_ui()
         self.ai_playing = False
 
+    def _call_replay_worker(self, coordinates):
+        self.worker = Worker.make_replay_worker(self.game, coordinates)
+        self.worker.progress.connect(self._replay_worker_progressed)
+        self.worker.finished.connect(lambda: self._replay_worker_finished())  
+        self.worker.start()
+
+    def _replay_worker_progressed(self):
+        self.update_ui()
+
+    def _replay_worker_finished(self):
+        self.update_ui()
+        self.ai_playing = False
+
     def _select_square(self, button):
         button.set_foreground('green')
 
