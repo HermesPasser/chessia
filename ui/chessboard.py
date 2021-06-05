@@ -1,6 +1,6 @@
 from functools import partial
 from PyQt5 import Qt, QtCore, QtWidgets
-from utils import make_2d_array
+from utils import make_2d_array, serialize
 from engine.position import Position
 from engine.game import ChessException, PromotionException
 from ui.promotion_dialog import PromotionDialog
@@ -129,17 +129,37 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.selected_spot_pos = None
         self.move_started = False
 
-        if message:
-            QtWidgets.QMessageBox.about(self, TITLE, message)
-            if 'CHECKMATE' in message or 'STALEMATE' in message:
-                self._show_parent()
-            return
+        self._check_end_game(message)
         
         # since we can't say the turn ended just because not exception was thrown
         if not self.no_ai and self.game.get_current_turn().is_black():
             self.ai_playing = True
             self._call_ai_worker()
 
+    def _serialize_match(self):
+        result = Qt.QFileDialog.getSaveFileName(self, 'Save match to replay', None, "Chessia (*.chessia)")
+        if result[0]:
+            serialize(self.game.moves, result[0])
+
+    def _check_end_game(self, message):
+        # TODO: using the message to know the game ended is too hackish
+        if message:
+            QtWidgets.QMessageBox.about(self, TITLE, message)
+            if 'CHECKMATE' in message or 'STALEMATE' in message:
+                if self.ai_playing:
+                    print("called")
+                    # why i'm calling this here?
+                    self._call_ai_worker()
+                else:
+                    ret = Qt.QMessageBox.question(self, TITLE, "Do you want to save this match?", 
+                        Qt.QMessageBox.Yes | Qt.QMessageBox.No)
+
+                    if ret == Qt.QMessageBox.Yes:
+                        self._serialize_match()
+
+                    self._show_parent()
+            return
+    
     def _start_move_piece(self, sender, position):
         # no point on starting the selection if the place has nothing
         if self.game.is_empty_spot(position):
@@ -166,10 +186,7 @@ class ChessBoardGUI(Qt.QMainWindow):
             self.ai_patch = [from_pos, to_pos]
             self.update_ui()
         
-        if message:
-            QtWidgets.QMessageBox.about(self, TITLE, message)
-            if 'CHECKMATE' in message or 'STALEMATE' in message:
-                self._call_ai_worker()
+        self._check_end_game(message)
 
     def _ai_worker_finished(self):
         self.game.play_turn_ia_end()

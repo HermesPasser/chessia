@@ -1,6 +1,9 @@
+from importlib import import_module
 from engine.color import Color
 from copy import copy
 import engine.pieces as pieces
+import pickle
+import io
 
 def make_2d_array(range=range(0, 1), default=0):
     return [[default for _ in range] for _ in range]
@@ -78,12 +81,36 @@ def make_spot(text):
 def make_spots(*args):
     return [make_spot(text) for text in args]
 
-def make_position_array(text):
-    pos = []
-    lines = text.split('\n')
-    for line in lines:
-        r, _, c, _, r2, _, c2 = list(line.strip())
-        tupl = (int(r), int(c), int(r2), int(c2))
-        pos.append(tupl)
-    
-    return pos
+
+class RestrictedUnpickler(pickle.Unpickler):
+
+    def find_class(self, module, name):
+        safe_modules = { 'engine.position', 'engine.move_result', 'engine.pieces', 'engine.color' }
+        safe_types = {
+            'CastlingMoveResult',
+            'MoveResult',
+            'Position',
+            'Color',
+            'King',
+            'Queen',
+            'Rook',
+            'Bishop',
+            'Knight',
+            'Pawn',
+        }
+
+        if module in safe_modules and name in safe_types:
+            return getattr(import_module(module), name)
+
+        raise pickle.UnpicklingError("global '%s.%s' is forbidden" % (module, name))
+
+def serialize(binary_data, filename : str):
+    file = io.open(filename, 'ab+')
+    pickle.dump(binary_data, file)
+    file.close()
+
+def deserialize(filename):
+    bytes = io.open(filename, 'rb')
+    obj = RestrictedUnpickler(bytes).load()
+    bytes.close()
+    return obj
