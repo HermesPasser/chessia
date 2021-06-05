@@ -2,7 +2,7 @@
 <ui version="4.0">
  <author>Hermes Passer &lt;dsldouglas@hotmail.com&gt;</author>
  <class>SetupUI</class>
- <widget class="QDialog" name="SetupUI">
+ <widget class="QMainWindow" name="SetupUI">
   <property name="geometry">
    <rect>
     <x>0</x>
