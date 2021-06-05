@@ -118,10 +118,12 @@ class ChessBoardGUI(Qt.QMainWindow):
         if self.selected_spot_pos is not None and self.selected_spot_pos is not position:
             try:
                 self.game.play_turn(self.selected_spot_pos, position)
-            except PromotionException:
-                self.game.promote(self.promo_dialog.show())
-                # need to finish manually since we didn't change since a exception was raised
-                self.game.change_turn()
+            except PromotionException: 
+                # TODO: make this less ugly
+                try:
+                    self.game.play_turn_promote(self.promo_dialog.show())
+                except ChessException as e:
+                    message = str(e)
             except ChessException as e:
                 message = str(e)
 
