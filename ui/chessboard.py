@@ -53,6 +53,10 @@ class ChessBoardGUI(Qt.QMainWindow):
         self.hide()
         self.parent.show()
 
+    def show(self):
+        super().show()
+        self.update_ui()
+
     def replay(self, coordinates):
         self.ai_playing = True
         self._call_replay_worker(coordinates)
