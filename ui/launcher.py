@@ -1,8 +1,8 @@
 from ui.chessboard import ChessBoardGUI, TITLE
-from PyQt5 import QtWidgets, uic
+from PyQt5 import Qt, QtWidgets, uic
 from utils import make_position_array
 
-class LauncherUI(QtWidgets.QDialog):
+class LauncherUI(Qt.QMainWindow):
     def __init__(self, game, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.game = game
@@ -12,6 +12,7 @@ class LauncherUI(QtWidgets.QDialog):
 
     def _initialize_component(self):
         uic.loadUi("ui/launcher.ui", self)
+        self.setFixedSize(self.width(), self.height())
         self.setWindowTitle(TITLE)
         self.board.setMinimumSize(600, 600)
         self.playButton.clicked.connect(self.open_board)
