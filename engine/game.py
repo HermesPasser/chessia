@@ -250,11 +250,10 @@ class Game():
         self.move(self.move_result_waiting_promotion)
         self.move_result_waiting_promotion = None
 
-    def replay(self, coordinates):
-        for r1, c1, r2, c2 in coordinates:
-            _, rs = self._check_move_state(Position(r1, c1), Position(r2, c2), self._turn)
+    def replay(self, moves):
+        for rs in moves:
             self.move(rs)
-            self._check_end_game() # is showing the wrong winner for some reason (it shows correctly in play_turn)
+            self._check_end_game()
             yield rs
             self.change_turn()
         

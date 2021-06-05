@@ -28,12 +28,9 @@ depth set to 5: _Chessmaster Incarnate_
 
 ## Replay
 
-Make the engine play itself following a moves. Per line must have the zero-based position plus a '-' and the ending position (yes, it doesn't uses the algebraic notation) in the format "rxc-rxc-p" where:  
-_r_ is the row  
-_c_ is the column  
-_p_ is the piece you are promoting the pawn to (no implemented yet so ignore '-p' part)  
+When the game ends you can save de match to be watched later.   
 
-By default you can watch a fool's mate.
+The source comes with the foolsmate.chessia file, which shows a fool's mate.
 
 ## License
 
