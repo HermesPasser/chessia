@@ -244,11 +244,14 @@ class Game():
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
 
-    def promote(self, piece : Piece):
+    def play_turn_promote(self, piece : Piece):
         self.move_result_waiting_promotion.promoted_to = piece(self._turn)
         # since move is not called in play_turn if needs to promote
         self.move(self.move_result_waiting_promotion)
         self.move_result_waiting_promotion = None
+
+        self._check_end_game()
+        self.change_turn()
 
     def replay(self, moves):
         for rs in moves:
