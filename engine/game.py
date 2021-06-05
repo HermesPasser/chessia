@@ -239,7 +239,7 @@ class Game():
         the_other_player = self._turn.reverse()
         if self._checkmated(the_other_player):
             self.game_ended = True
-            raise ChessException(f"CHECKMATE\n{the_other_player} have won!")
+            raise ChessException(f"CHECKMATE\n{the_other_player} was checkmated by {self._turn}!")
         elif self._stalemated(the_other_player):
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
@@ -264,13 +264,17 @@ class Game():
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
-
-            self._check_end_game()
+            
+            # NOTE: if is checkmate before the promotion, we will promote it
+            # anyway. The checkmate message will displayed after the promotion
+            # message
             if isinstance(mr, MoveResult) and mr.should_promote:
                 self.move_result_waiting_promotion = mr
                 raise PromotionException()
             
             self.move(mr)
+
+            self._check_end_game()
             self.change_turn()
 
         elif rs == MoveState.CAN_NOT_BE_PLACED:
@@ -297,13 +301,14 @@ class Game():
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
         if ai_move:
 
-            self._check_end_game()
             if ai_move.should_promote:
                 ai_move.promoted_to = Queen(Color.BLACK)
             
             self.move(ai_move)
         
             print("ai::", ai_move)
+            self._check_end_game()
+
             return (ai_move.from_pos, ai_move.to_pos)
 
     def play_turn_ia_end(self):
