@@ -1,5 +1,6 @@
 from tests.board_test import BoardTests
 from tests.game_test import GameTests
+from tests.ai_test import AiTests
 from tests.pieces.pawn_test import PawnTest
 from tests.pieces.knight_test import KnightTest
 from tests.pieces.rook_test import RookTest

@@ -21,42 +21,42 @@ class Board():
     def __repr__(self):
         # FIXME: i think is omitting something
         sio = StringIO()
-        for _, y, p in self._iterate():
+        for _, c, p in self._iterate():
             p = '=' if p is None else str(p)
             sio.write(p)
             
-            if y == Board.SIZE -1:
+            if c == Board.SIZE -1:
                 sio.write("\n")
         s = sio.getvalue()
         sio.close()
         return s.strip()
 
-    def get(self, x: int, y: int):
-        if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
+    def get(self, r: int, c: int):
+        if r < 0 or r >= Board.SIZE or c < 0 or c >= Board.SIZE:
             raise Exception("Index out of bound")
 
-        return self._board[x][y]
+        return self._board[r][c]
 
-    def set(self, x: int, y: int, piece : Piece):
-        if x < 0 or x >= Board.SIZE or y < 0 or y >= Board.SIZE:
+    def set(self, r: int, c: int, piece : Piece):
+        if r < 0 or r >= Board.SIZE or c < 0 or c >= Board.SIZE:
             raise Exception("Index out of bound")
 
         if isinstance(piece, King):
             if piece.color == Color.WHITE:
-                self.white_king_loc = Position(x, y)
+                self.white_king_loc = Position(r, c)
             else:
-                self.black_king_loc = Position(x, y)
+                self.black_king_loc = Position(r, c)
         
-        self._board[x][y] = piece
+        self._board[r][c] = piece
 
     def move(self, from_pos : Position, to_pos : Position): 
-        prev = self._board[from_pos.x][from_pos.y]
+        prev = self._board[from_pos.r][from_pos.c]
         
-        if isinstance(self._board[to_pos.x][to_pos.y], King):
+        if isinstance(self._board[to_pos.r][to_pos.c], King):
             raise Exception("Can't override the king")
 
-        self._board[to_pos.x][to_pos.y] = prev
-        self._board[from_pos.x][from_pos.y] = None
+        self._board[to_pos.r][to_pos.c] = prev
+        self._board[from_pos.r][from_pos.c] = None
 
         if isinstance(prev, King):
             if prev.color == Color.WHITE:
@@ -71,9 +71,9 @@ class Board():
             elif self.black_king_loc:
                 return self.black_king_loc
                 
-        for x, y, p in self._iterate():
+        for row, col, p in self._iterate():
             if type(p) is type_piece and p.color == color:
-                return Position(x, y)
+                return Position(row, col)
 
         raise Exception(f"No {color} {type_piece.__name__} found")
 
@@ -84,7 +84,7 @@ class Board():
     # make sense having it but it deals with the internals 
     # of the board.
     def is_square_in_check(self, color, pos_to_check : Position):
-        is_empty_spot = self.is_empty_spot(pos_to_check.x, pos_to_check.y)
+        is_empty_spot = self.is_empty_spot(pos_to_check.r, pos_to_check.c)
         other_player_color = color.reverse()
        
         in_check = False
@@ -95,38 +95,38 @@ class Board():
                 # Remember: the pawn eats diagonally and moves vertically
                 if isinstance(piece, Pawn) and is_empty_spot:
                     clear_spot = True
-                    self.set(pos_to_check.x, pos_to_check.y, Pawn(color))
+                    self.set(pos_to_check.r, pos_to_check.c, Pawn(color))
                 
                 if piece.can_move(self, pos, pos_to_check):
                     in_check = True
 
                 if clear_spot:
-                    self.set(pos_to_check.x, pos_to_check.y, None)
+                    self.set(pos_to_check.r, pos_to_check.c, None)
                 
                 if in_check:
                     break
         
         return in_check
 
-    def is_empty_spot(self, x, y):
-        return self.get(x, y) is None
+    def is_empty_spot(self, row, col):
+        return self.get(row, col) is None
 
     # TODO: create wrapper for vertical/horizontal/diagonal where we pass
     # two Positions
     # TODO: merge with vertical
-    # TODO: replace position by the x,y used
+    # TODO: replace position by the r,c used
     def get_pieces_range_horizontal(self, origin : Position, end : Position):
         # TODO: rename variables
         
-        move_to_right  = range(origin.y, end.y + 1)
-        move_to_left = range(end.y, origin.y + 1)
-        current_range = move_to_right if origin.y - end.y < 0 else move_to_left
+        move_to_right  = range(origin.c, end.c + 1)
+        move_to_left = range(end.c, origin.c + 1)
+        current_range = move_to_right if origin.c - end.c < 0 else move_to_left
         
         pieces = []
-        for y in current_range:
-            piece = self.get(origin.x, y)
+        for col in current_range:
+            piece = self.get(origin.r, col)
             if piece is not None:
-                pieces.append((piece, origin.x, y))
+                pieces.append((piece, origin.r, col))
 
         # ensure the list always start from the piece within
         # origin and ends with the piece within the end
@@ -136,32 +136,32 @@ class Board():
         return pieces
 
     def get_pieces_range_vertical(self, origin : Position, end : Position):
-        trying_to_move_horizontally = origin.x - end.x < 0 and origin.y - end.y < 0
+        trying_to_move_horizontally = origin.r - end.r < 0 and origin.c - end.c < 0
         if trying_to_move_horizontally:
             return []
         
-        descend = range(origin.x, end.x + 1)
-        ascend = range(end.x, origin.x + 1)
-        current_range = descend if origin.x - end.x < 0 else ascend
+        descend = range(origin.r, end.r + 1)
+        ascend = range(end.r, origin.r + 1)
+        current_range = descend if origin.r - end.r < 0 else ascend
         
         pieces = []
-        for x in current_range:
-            piece = self.get(x, origin.y)
+        for row in current_range:
+            piece = self.get(row, origin.c)
             if piece is not None:
-                pieces.append((piece, x, origin.y))
+                pieces.append((piece, row, origin.c))
         
         if current_range == ascend:
             pieces.reverse()
         
         return pieces
 
-    def get_pieces_range_diagonal(self, origin_x : int, origin_y : int, end_x : int, end_y : int):
+    def get_pieces_range_diagonal(self, origin_r : int, origin_c : int, end_r : int, end_c : int):
         """ Returns a array of tuples with the coordinates from each piece and the piece itself whitin the (inclusive) range."""
-        diff_x = origin_x - end_x 
-        diff_y = origin_y - end_y
-        abs_x = abs(diff_x) 
-        abs_y = abs(diff_y)
-        valid_diagonal = abs_x == abs_y
+        diff_r = origin_r - end_r 
+        diff_c = origin_c - end_c
+        abs_r = abs(diff_r) 
+        abs_c = abs(diff_c)
+        valid_diagonal = abs_r == abs_c
 
         if not valid_diagonal:
             return []
@@ -170,53 +170,52 @@ class Board():
 
         #nw(0,0)|ne(0,7)
         #ms(7,0)|se(7,7)
-        increment_se = lambda x, y:(x+1, y+1)
-        increment_ms = lambda x, y:(x+1, y-1)
-        increment_nw = lambda x, y:(x-1, y-1)
-        increment_ne = lambda x, y:(x-1, y+1)
+        increment_se = lambda row, col:(row+1, col+1)
+        increment_ms = lambda row, col:(row+1, col-1)
+        increment_nw = lambda row, col:(row-1, col-1)
+        increment_ne = lambda row, col:(row-1, col+1)
         equals = lambda x1, y1, x2, y2: x1 == x2 and y1 == y2
 
         current = None
-        if diff_x == diff_y and diff_x > 0:
+        if diff_r == diff_c and diff_r > 0:
             current = increment_nw
-        elif diff_x == diff_y and diff_x < 0:
+        elif diff_r == diff_c and diff_r < 0:
             current = increment_se
-        elif diff_x < 0 < diff_y and abs_x == abs_y:
+        elif diff_r < 0 < diff_c and abs_r == abs_c:
             current = increment_ms
-        else: # diff_y < 0 < diff_x and abs_x == abs_y:
+        else: # diff_c < 0 < diff_r and abs_r == abs_c:
             current = increment_ne
 
-        def append(x, y):
-            piece = self.get(x, y)
+        def append(r, c):
+            piece = self.get(r, c)
             if piece is not None:
-                pieces.append((piece, x, y))
+                pieces.append((piece, r, c))
         
-        x = origin_x
-        y = origin_y
-        while not equals(x, y, end_x, end_y):
-            append(x, y)
-            x , y = current(x, y)
+        r = origin_r
+        c = origin_c
+        while not equals(r, c, end_r, end_c):
+            append(r, c)
+            r , c = current(r, c)
         # since we're inclusive (start..end)
         else: 
-            append(end_x, end_y)
+            append(end_r, end_c)
      
         return pieces
 
     def iterate_material(self, color : Color):
-        for x, y, p in self._iterate():
+        for row, col, p in self._iterate():
             if p and p.color == color:
-                yield p, Position(x, y)
+                yield p, Position(row, col)
 
     def _iterate(self):
-         for x in range(Board.SIZE):
-            for y in range(Board.SIZE):
-                yield x, y, self.get(x, y)
+         for row in range(Board.SIZE):
+            for col in range(Board.SIZE):
+                yield row, col, self.get(row, col)
 
     def _remove_piece(self, piece):
         pass
 
     def _make_board(self):
-        # FIXME: the acess is [y][x] so i should rename in the other places
         self._board[0][0] = Rook(Color.BLACK)
         self._board[0][1] = Knight(Color.BLACK)
         self._board[0][2] = Bishop(Color.BLACK)

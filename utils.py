@@ -1,6 +1,9 @@
+from importlib import import_module
 from engine.color import Color
 from copy import copy
 import engine.pieces as pieces
+import pickle
+import io
 
 def make_2d_array(range=range(0, 1), default=0):
     return [[default for _ in range] for _ in range]
@@ -51,34 +54,34 @@ def load_board(board, text):
         raise Exception(f"string size ({len(text)}) does not match the board size ({board.SIZE * board.SIZE})")
 
     i = 0
-    for x, y, _ in board._iterate():
+    for row, col, _ in board._iterate():
         piece = piece_from_char(text[i])
 
         if piece:
-            # [x][y] or [y][x] i don't even know anymore
-            board.set(x, y, piece)
+            board.set(row, col, piece)
         else: # since i may reload the board, is better i clean up the trash
-            board.set(x, y, None)
+            board.set(row, col, None)
         
         i += 1  
 
 
 def make_spot(text):
-    """Given a string p<x,y> where:
+    """Given a string p<r,c> where:
 
     p is a char representation of a piece
-    x and y are a digit 
+    r and c are a digit 
     
     returns a tuple reprsenting a spot/square:
     (pieces.Piece, int, int)
     """
-    p, _, x, _, y, _ = list(text)
-    return (piece_from_char(p), int(x), int(y))
+    p, _, r, _, c, _ = list(text)
+    return (piece_from_char(p), int(r), int(c))
 
 
 def make_spots(*args):
     return [make_spot(text) for text in args]
 
+<<<<<<< HEAD
 def make_position_array(text):
     pos = []
     lines = text.split('\n')
@@ -88,3 +91,38 @@ def make_position_array(text):
         pos.append(tupl)
     
     return pos
+=======
+
+class RestrictedUnpickler(pickle.Unpickler):
+
+    def find_class(self, module, name):
+        safe_modules = { 'engine.position', 'engine.move_result', 'engine.pieces', 'engine.color' }
+        safe_types = {
+            'CastlingMoveResult',
+            'MoveResult',
+            'Position',
+            'Color',
+            'King',
+            'Queen',
+            'Rook',
+            'Bishop',
+            'Knight',
+            'Pawn',
+        }
+
+        if module in safe_modules and name in safe_types:
+            return getattr(import_module(module), name)
+
+        raise pickle.UnpicklingError("global '%s.%s' is forbidden" % (module, name))
+
+def serialize(binary_data, filename : str):
+    file = io.open(filename, 'ab+')
+    pickle.dump(binary_data, file)
+    file.close()
+
+def deserialize(filename):
+    bytes = io.open(filename, 'rb')
+    obj = RestrictedUnpickler(bytes).load()
+    bytes.close()
+    return obj
+>>>>>>> dev

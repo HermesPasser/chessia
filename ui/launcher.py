@@ -1,8 +1,13 @@
 from ui.chessboard import ChessBoardGUI, TITLE
+<<<<<<< HEAD
 from PyQt5 import QtWidgets, uic
 from utils import make_position_array
+=======
+from PyQt5 import Qt, uic
+from utils import deserialize
+>>>>>>> dev
 
-class LauncherUI(QtWidgets.QDialog):
+class LauncherUI(Qt.QMainWindow):
     def __init__(self, game, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.game = game
@@ -12,10 +17,18 @@ class LauncherUI(QtWidgets.QDialog):
 
     def _initialize_component(self):
         uic.loadUi("ui/launcher.ui", self)
+<<<<<<< HEAD
         self.setWindowTitle(TITLE)
         self.board.setMinimumSize(600, 600)
         self.playButton.clicked.connect(self.open_board)
         self.replayButton.clicked.connect(self.open_replay_editbox)
+=======
+        self.setFixedSize(self.width(), self.height())
+        self.setWindowTitle(TITLE)
+        self.board.setMinimumSize(600, 600)
+        self.playButton.clicked.connect(self.open_board)
+        self.replayButton.clicked.connect(self.load_match)
+>>>>>>> dev
         self.difficulty_1.toggled.connect(lambda: self.set_difficulty(2))
         self.difficulty_2.toggled.connect(lambda: self.set_difficulty(3))
         self.difficulty_3.toggled.connect(lambda: self.set_difficulty(4))
@@ -34,6 +47,7 @@ class LauncherUI(QtWidgets.QDialog):
         self.board.show()
         self.hide()
 
+<<<<<<< HEAD
     def open_replay_editbox(self):
         self.editbox.show()
 
@@ -45,3 +59,19 @@ class LauncherUI(QtWidgets.QDialog):
             self.board.replay(ar)
         except Exception as e:
             print(e)
+=======
+    def load_match(self):
+        self.game.restart()
+        result = Qt.QFileDialog.getOpenFileName(self, 'Open match to replay', None, "Chessia (*.chessia)")
+        if not result[0]:
+            return
+        
+        try:
+            moves = deserialize(result[0])
+            print(moves)
+            self.open_board()
+            self.board.replay(moves)
+        except Exception as e:
+            print(e)
+
+>>>>>>> dev

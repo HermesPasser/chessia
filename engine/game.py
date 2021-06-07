@@ -5,6 +5,7 @@ from engine.color import Color
 from engine.pieces import Piece, King, Queen, Pawn
 from enum import Enum
 import engine.ai as ai
+import time
 
 class MoveState(Enum):
     CAN_BE_PLACED = 0
@@ -43,15 +44,15 @@ class Game():
        self._turn = self._turn.reverse()
 
     def is_empty_spot(self, position : Position) -> bool:
-        return self.board.is_empty_spot(position.x, position.y)
+        return self.board.is_empty_spot(position.r, position.c)
 
     def _capture(self, position : Position):
-        self.board.set(position.x, position.y, None)
+        self.board.set(position.r, position.c, None)
 
     def move(self, move : MoveResult):
         if isinstance(move, CastlingMoveResult):
-            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = False
-            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = False
+            self.board.get(move.king_pos.r, move.king_pos.c).is_first_move = False
+            self.board.get(move.rook_pos.r, move.rook_pos.c).is_first_move = False
 
             self.board.move(move.king_pos, move.king_final_pos)
             self.board.move(move.rook_pos, move.rook_final_pos)
@@ -66,13 +67,26 @@ class Game():
                 if not move.promoted_to:
                     move.promoted_to = Queen(move.piece.color)
                 
-                self.board.set(move.to_pos.x, move.to_pos.y, move.promoted_to)
+                self.board.set(move.to_pos.r, move.to_pos.c, move.promoted_to)
                 
             move.piece.is_first_move = False
 
         self.moves.append(move)
 
+    def get_valid_moves_raw(self, piece, pos) -> list:
+        """Returns all the spots thar a spefic 'piece' can be placed given its position 'pos'."""
+        legal_moves = []
+        pseudo_moves = piece.get_pseudo_moves(pos)
+
+        for pseudo in pseudo_moves:
+            rs, result = self._check_move_state(pos, pseudo, piece.color)
+            if rs == MoveState.CAN_BE_PLACED and result:
+                legal_moves.append(pseudo)
+    
+        return legal_moves
+
     def get_moves(self, color) -> MoveResult:
+        """Returns a list of all possible valid MoveResults that a given rank can do."""
         # loop tru all pieces from a color
         moves = []
         for p, pos in self.board.iterate_material(color):
@@ -96,23 +110,23 @@ class Game():
             self.board.move(move.king_final_pos, move.king_pos)
             self.board.move(move.rook_final_pos, move.rook_pos)
             
-            self.board.get(move.king_pos.x, move.king_pos.y).is_first_move = True
-            self.board.get(move.rook_pos.x, move.rook_pos.y).is_first_move = True
+            self.board.get(move.king_pos.r, move.king_pos.c).is_first_move = True
+            self.board.get(move.rook_pos.r, move.rook_pos.c).is_first_move = True
 
             return
         
         self.board.move(move.to_pos, move.from_pos)
        
         if move.should_promote:
-            self.board.set(move.from_pos.x, move.from_pos.y, move.piece)
-        self.board.get(move.from_pos.x, move.from_pos.y).is_first_move = move.was_first_move
+            self.board.set(move.from_pos.r, move.from_pos.c, move.piece)
+        self.board.get(move.from_pos.r, move.from_pos.c).is_first_move = move.was_first_move
         
         if move.captured:
-            self.board.set(move.captured_position.x, move.captured_position.y, move.captured)
+            self.board.set(move.captured_position.r, move.captured_position.c, move.captured)
         
     def _move_will_leave_in_check_state(self, result : MoveResult, from_pos : Position, to_pos : Position, turn) -> bool:
         """ This will do the move, check if it make the king be in check, and then undo the move. """
-        piece_on_destination = self.board.get(to_pos.x, to_pos.y)
+        piece_on_destination = self.board.get(to_pos.r, to_pos.c)
 
         if piece_on_destination:
             if piece_on_destination.color == turn or isinstance(piece_on_destination, King):
@@ -127,7 +141,7 @@ class Game():
         # of the flawed way i handle the current/next turn check
         # verifying code
         if not result and piece_on_destination:
-            self.board.set(to_pos.x, to_pos.y, piece_on_destination)
+            self.board.set(to_pos.r, to_pos.c, piece_on_destination)
 
         return will_be_in_check
 
@@ -164,7 +178,7 @@ class Game():
             if isinstance(piece, Pawn):
                 piece.did_moved_twice = False
 
-        piece = self.board.get(from_pos.x, from_pos.y)
+        piece = self.board.get(from_pos.r, from_pos.c)
         selected_piece_is_our_king = type(piece) is King and piece.color == turn
         is_in_check = self.board.in_check(turn)
         
@@ -182,8 +196,6 @@ class Game():
             land_under_attack = self.board.is_square_in_check(turn, to_pos)
         
         result = piece.can_move(self.board, from_pos, to_pos, land_under_attack)
-        
-        result.set_moved_piece(piece, from_pos, to_pos, piece.is_first_move)
         will_be_in_check = self._move_will_leave_in_check_state(result, from_pos, to_pos, turn)
           
         # TODO: this check is in king.can_move too since i can't figure the best way to
@@ -191,7 +203,7 @@ class Game():
         # defined that is not a valid move from king if it will be in check so i put
         # the same logic there. Maybe i can put MoveState as a MoveResult property
         # and remove it from here.
-        # HACK: since the final position is a lie (end != rook pos but rook.x,rook.y-1)
+        # HACK: since the final position is a lie (end != rook pos but rook.r,rook.c-1)
         # and we have to check if the ACTUAL position where the king is going is in check
         if isinstance(result, CastlingMoveResult):
             if self.board.is_square_in_check(turn, result.king_final_pos):
@@ -228,22 +240,32 @@ class Game():
         the_other_player = self._turn.reverse()
         if self._checkmated(the_other_player):
             self.game_ended = True
-            raise ChessException(f"CHECKMATE\n{the_other_player} have won!")
+            raise ChessException(f"CHECKMATE\n{the_other_player} was checkmated by {self._turn}!")
         elif self._stalemated(the_other_player):
             self.game_ended = True
             raise ChessException(f"Draw by STALEMATE")
 
-    def promote(self, piece : Piece):
+    def play_turn_promote(self, piece : Piece):
         self.move_result_waiting_promotion.promoted_to = piece(self._turn)
         # since move is not called in play_turn if needs to promote
         self.move(self.move_result_waiting_promotion)
         self.move_result_waiting_promotion = None
 
+<<<<<<< HEAD
     def replay(self, coordinates):
         for r1, c1, r2, c2 in coordinates:
             _, rs = self._check_move_state(Position(r1, c1), Position(r2, c2), self._turn)
             self.move(rs)
             self._check_end_game() # is showing the wrong winner for some reason (it shows correctly in play_turn)
+=======
+        self._check_end_game()
+        self.change_turn()
+
+    def replay(self, moves):
+        for rs in moves:
+            self.move(rs)
+            self._check_end_game()
+>>>>>>> dev
             yield rs
             self.change_turn()
         
@@ -254,13 +276,17 @@ class Game():
         rs, mr = self._check_move_state(from_pos, to_pos)
 
         if rs == MoveState.CAN_BE_PLACED:
-
-            self._check_end_game()
+            
+            # NOTE: if is checkmate before the promotion, we will promote it
+            # anyway. The checkmate message will displayed after the promotion
+            # message
             if isinstance(mr, MoveResult) and mr.should_promote:
                 self.move_result_waiting_promotion = mr
                 raise PromotionException()
             
             self.move(mr)
+
+            self._check_end_game()
             self.change_turn()
 
         elif rs == MoveState.CAN_NOT_BE_PLACED:
@@ -283,17 +309,19 @@ class Game():
         # being call on the play_turn()
         
         # TODO: we don't handle when the a.i don't have valid moves
-
+        start = time.time()
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
+        print('ai:: took', start - time.time(), 's')
         if ai_move:
 
-            self._check_end_game()
             if ai_move.should_promote:
                 ai_move.promoted_to = Queen(Color.BLACK)
             
             self.move(ai_move)
         
             print("ai::", ai_move)
+            self._check_end_game()
+
             return (ai_move.from_pos, ai_move.to_pos)
 
     def play_turn_ia_end(self):

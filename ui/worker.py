@@ -35,19 +35,26 @@ class Worker(Qt.QObject):
 
     def run_ai(self):
         message = None
+        from_pos = None
+        to = None
+
         try:
             from_pos, to = self.game.play_turn_ia_start()
         except ChessException as e:
             message = str(e)
         
-        if from_pos and to:
+        if (from_pos and to) or message:
             self.progress.emit(from_pos, to, message)
+        
         self.finished.emit()
 
     def run_replay(self):
         try:
             for rs in self.game.replay(self.coordinates):
+<<<<<<< HEAD
                 print("?")
+=======
+>>>>>>> dev
                 self.progress.emit(None, None, '')
                 time.sleep(2)
             
