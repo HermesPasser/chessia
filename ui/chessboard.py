@@ -64,7 +64,7 @@ class ChessBoardGUI(Qt.QMainWindow):
     def _initialize_component(self):
         self.promo_dialog = PromotionDialog()
         self.resized.connect(self._on_resize)
-
+        
         centralWidget = Qt.QWidget()
         self.setCentralWidget(centralWidget)
         self.layout = Qt.QGridLayout(centralWidget)
@@ -75,12 +75,23 @@ class ChessBoardGUI(Qt.QMainWindow):
 
     def _initialize_board_buttons(self):
         self.board_buttons = make_2d_array(range(0, 8), None)    
+        
+        for i in range(0, 8):
+            l = Qt.QLabel(f"{chr(ord('a') + i)}", self)
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            self.layout.addWidget(l, 0, i + 1)
+
+        for i in range(0, 8):
+            l = Qt.QLabel(f"{8 - i}", self)
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            self.layout.addWidget(l, i + 1, 0)
+        
         for r in range(0, 8):
             for c in range(0, 8):
                 btn = Button(f'{r}x{c}', self)
                 btn.clicked.connect(partial(self._click, btn, Position(r, c)))
 
-                self.layout.addWidget(btn, r, c)
+                self.layout.addWidget(btn, r + 1, c + 1)
                 self.board_buttons[r][c] = btn
 
     def update_ui(self):
