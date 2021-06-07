@@ -5,6 +5,7 @@ from engine.color import Color
 from engine.pieces import Piece, King, Queen, Pawn
 from enum import Enum
 import engine.ai as ai
+import time
 
 class MoveState(Enum):
     CAN_BE_PLACED = 0
@@ -300,8 +301,9 @@ class Game():
         # being call on the play_turn()
         
         # TODO: we don't handle when the a.i don't have valid moves
-
+        start = time.time()
         _, ai_move = ai.calc_best_move(self.ai_difficulty, self, Color.BLACK)
+        print('ai:: took', start - time.time(), 's')
         if ai_move:
 
             if ai_move.should_promote:
