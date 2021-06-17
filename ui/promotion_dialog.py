@@ -11,8 +11,8 @@ class PromotionDialog():
         values = [Queen, Rook, Knight, Bishop]
 
         msgBox = QMessageBox(self.parent)
-        msgBox.setText('Promotion dialog')
-        msgBox.setWindowTitle('Which piece do you want the pawn to be promoted to?')
+        msgBox.setText('Which piece do you want the pawn to be promoted to?')
+        msgBox.setWindowTitle('Promotion dialog')
 
         for piece in values:
             msgBox.addButton(Button(str(piece(0)), self.parent), QMessageBox.YesRole)
