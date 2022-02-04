@@ -12,7 +12,7 @@ class Button(Qt.QPushButton):
         self.set_size(75, 75)
 
     def set_size(self, width, height):
-        self.setMinimumSize(Qt.QSize(width, height))
+        self.setMinimumSize(Qt.QSize(int(width), int(height)))
 
     def set_background(self, color):
         self._bg_color = color
